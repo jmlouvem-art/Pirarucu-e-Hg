@@ -61,19 +61,30 @@
 <div id="name-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-30">
   <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
     
+    <!-- Modal de Nome do Jogador -->
+<div id="name-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-30">
+  <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+    
     <!-- LOGO -->
-    <img src="logo (1).png" alt="Pirarucu Aventureiro" 
-         class="mx-auto mb-4 w-32 h-32 object-contain rounded-full shadow" />
+    <div class="flex justify-center mb-4">
+      <img src="logo.png" alt="Pirarucu Aventureiro" 
+           class="w-48 h-auto max-w-[90%] rounded-xl shadow-md" />
+    </div>
 
     <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
     <p class="mb-4">Digite seu nome para começar:</p>
-    <input type="text" id="player-name-input" placeholder="Seu nome" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20">
-    <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
-    <button id="view-ranking-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
+    <input type="text" id="player-name-input" placeholder="Seu nome"
+           class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20">
+    <button id="name-submit-button"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">
+      Continuar
+    </button>
+    <button id="view-ranking-button"
+            class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">
+      Ver Ranking
+    </button>
   </div>
-
-    </div>
-
+</div>
     <div id="game-container" class="w-full max-w-md h-full bg-blue-800 shadow-2xl flex flex-col relative hidden">
         <!-- Cabeçalho com informações -->
         <div class="p-3 bg-blue-200 bg-opacity-80 text-gray-800 flex justify-between items-center z-10">
