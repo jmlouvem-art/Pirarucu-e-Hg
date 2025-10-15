@@ -128,34 +128,8 @@
 <div id="start-modal"
      class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[60] hidden opacity-0">
   <div class="bg-white rounded-lg p-6 text-center shadow-xl w-full max-w-md mx-auto">
-       <!-- LOGO (sem arredondamento) -->
     <img src="logo (1).png" alt="Pirarucu Aventureiro"
          class="mx-auto mb-4 w-40 h-auto shadow" style="border-radius:0;">
-
-    <h2 class="text-2xl font-bold mb-2">🐟 Pirarucu Aventureiro</h2>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-4">
-      <p class="font-bold text-green-600">
-        🟢 Peixes Seguros (baixo mercúrio):<br>
-        Tambaqui, Pacu, Aruanã
-      </p>
-      <p class="font-bold text-red-600">
-        🔴 Peixes Contaminados (alto mercúrio):<br>
-        Tucunaré, Surubim, Piranha
-      </p>
-    </div>
-    ...
-    <button id="start-button"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">
-      Começar a Jogar
-    </button>
-  </div>
-</div>
-
-    <!-- LOGO (sem arredondamento) -->
-    <img src="logo (1).png" alt="Pirarucu Aventureiro"
-         class="mx-auto mb-4 w-40 h-auto shadow" style="border-radius:0;">
-
     <h2 class="text-2xl font-bold mb-2">🐟 Pirarucu Aventureiro</h2>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-4">
@@ -800,14 +774,15 @@ playerImg.onerror = () => console.warn('Imagem do jogador não encontrada: Pirar
             }, 300);
         });
 
-        restartButton.addEventListener('click', () => {
-            gameOverModal.style.opacity = '0';
-            setTimeout(() => {
-                gameOverModal.classList.add('hidden');
-                init();
-                gameRunning = true;
-            }, 300);
-        });
+       restartButton.addEventListener('click', () => {
+  gameOverModal.style.opacity = '0';
+  setTimeout(() => {
+    gameOverModal.classList.add('hidden');
+    init();
+    gameRunning = true;
+    gameLoop(); // <- adiciona isto
+  }, 300);
+});
 
         continueButton.addEventListener('click', () => {
             infoModal.style.opacity = '0';
