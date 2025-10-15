@@ -728,13 +728,28 @@ playerImg.onerror = () => console.warn('Imagem do jogador não encontrada: Pirar
             }
         });
 
-        viewRankingButton.addEventListener('click', () => {
-            displayRanking();
-            rankingModal.classList.remove('hidden');
-            setTimeout(() => {
-                rankingModal.style.opacity = '1';
-            }, 10);
-        });
+      // Abrir ranking a partir do modal de nome
+viewRankingButton.addEventListener('click', () => {
+  displayRanking();
+  nameModal.classList.add('hidden');               // esconde o modal de nome
+  rankingModal.classList.remove('hidden');
+  setTimeout(() => { rankingModal.style.opacity = '1'; }, 10);
+    <div id="ranking-modal"
+     class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[80] hidden opacity-0">
+});
+
+// Fechar ranking
+closeRankingButton.addEventListener('click', () => {
+  rankingModal.style.opacity = '0';
+  setTimeout(() => {
+    rankingModal.classList.add('hidden');
+    // Se o jogo ainda não começou, volta para o modal de nome
+    if (!gameRunning) {
+      nameModal.classList.remove('hidden');
+      nameModal.style.opacity = '1';
+    }
+  }, 300);
+});
 
         viewRankingGameoverButton.addEventListener('click', () => {
             displayRanking();
