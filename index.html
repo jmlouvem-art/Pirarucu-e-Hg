@@ -257,7 +257,8 @@
 
         // Imagens
         const playerImg = new Image();
-        playerImg.src = 'Pirarucú.png';
+        playerImg.src = 'Pirarucu.png';
+playerImg.onerror = () => console.warn('Imagem do jogador não encontrada: Pirarucu.png');
 
         const fishImages = {
             'Tambaqui': new Image(),
@@ -273,8 +274,8 @@
 
         fishImages['Tambaqui'].src = 'Tambaqui.png';
         fishImages['Pacu'].src = 'Pacu.png';
-        fishImages['Aruanã'].src = 'Aruanã.png';
-        fishImages['Tucunaré'].src = 'Tucunaré.png';
+        fishImages['Aruanã'].src = 'Aruana.png';
+        fishImages['Tucunaré'].src = 'Tucunare.png';
         fishImages['Surubim'].src = 'Surubim.png';
         fishImages['Piranha'].src = 'Piranha.png';
         fishImages["Castanha"].src = "Castanha.png";
