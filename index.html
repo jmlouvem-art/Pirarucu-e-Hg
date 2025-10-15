@@ -202,7 +202,11 @@
             </div>
             <button id="close-ranking-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mt-4">Fechar</button>
         </div>
-    </div>
+        <div id="ranking-modal"
+     class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[80] hidden opacity-0">
+  ...
+</div>
+</div>
 
     <script>
         // Elementos do DOM
@@ -708,133 +712,89 @@ playerImg.onerror = () => console.warn('Não achei pirarucu.png');
             }, 10);
         }
 
-        // Event Listeners
-        nameSubmitButton.addEventListener('click', () => {
-            const name = playerNameInput.value.trim();
-            if (name) {
-                playerName = name;
-                playerNameDisplayEl.textContent = playerName;
-                nameModal.style.opacity = '0';
-                setTimeout(() => {
-                    nameModal.classList.add('hidden');
-                    gameContainer.classList.remove('hidden');
-                    startModal.classList.remove('hidden');
-                    setTimeout(() => {
-                        startModal.style.opacity = '1';
-                    }, 10);
-                }, 300);
-            } else {
-                alert('Por favor, digite seu nome!');
-            }
-        });
-
-      // Abrir ranking a partir do modal de nome
-viewRankingButton.addEventListener('click', () => {
-  displayRanking();
-  nameModal.classList.add('hidden');               // esconde o modal de nome
-  rankingModal.classList.remove('hidden');
-  setTimeout(() => { rankingModal.style.opacity = '1'; }, 10);
-    <div id="ranking-modal"
-     class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[80] hidden opacity-0">
+      // Event Listeners
+nameSubmitButton.addEventListener('click', () => {
+  const name = playerNameInput.value.trim();
+  if (name) {
+    playerName = name;
+    playerNameDisplayEl.textContent = playerName;
+    nameModal.style.opacity = '0';
+    setTimeout(() => {
+      nameModal.classList.add('hidden');
+      gameContainer.classList.remove('hidden');
+      startModal.classList.remove('hidden');
+      setTimeout(() => { startModal.style.opacity = '1'; }, 10);
+    }, 300);
+  } else {
+    alert('Por favor, digite seu nome!');
+  }
 });
 
-// Fechar ranking
+// Abrir ranking a partir do modal de nome
+viewRankingButton.addEventListener('click', () => {
+  displayRanking();
+  nameModal.classList.add('hidden');     // esconde modal de nome para não sobrepor
+  rankingModal.classList.remove('hidden');
+  setTimeout(() => { rankingModal.style.opacity = '1'; }, 10);
+});
+
+// Fechar ranking (um único listener)
 closeRankingButton.addEventListener('click', () => {
   rankingModal.style.opacity = '0';
   setTimeout(() => {
     rankingModal.classList.add('hidden');
-    // Se o jogo ainda não começou, volta para o modal de nome
-    if (!gameRunning) {
+    if (!gameRunning) {                  // se ainda não começou o jogo, volta pro modal de nome
       nameModal.classList.remove('hidden');
       nameModal.style.opacity = '1';
     }
   }, 300);
 });
 
-        viewRankingGameoverButton.addEventListener('click', () => {
-            displayRanking();
-            gameOverModal.style.opacity = '0';
-            setTimeout(() => {
-                gameOverModal.classList.add('hidden');
-                rankingModal.classList.remove('hidden');
-                setTimeout(() => {
-                    rankingModal.style.opacity = '1';
-                }, 10);
-            }, 300);
-        });
+viewRankingGameoverButton.addEventListener('click', () => {
+  displayRanking();
+  gameOverModal.style.opacity = '0';
+  setTimeout(() => {
+    gameOverModal.classList.add('hidden');
+    rankingModal.classList.remove('hidden');
+    setTimeout(() => { rankingModal.style.opacity = '1'; }, 10);
+  }, 300);
+});
 
-        closeRankingButton.addEventListener('click', () => {
-            rankingModal.style.opacity = '0';
-            setTimeout(() => {
-                rankingModal.classList.add('hidden');
-                if (gameRunning || fish.length > 0) {
-                    // Voltar ao jogo
-                } else {
-                    // Voltar ao menu inicial
-                    nameModal.classList.remove('hidden');
-                    setTimeout(() => {
-                        nameModal.style.opacity = '1';
-                    }, 10);
-                }
-            }, 300);
-        });
+startButton.addEventListener('click', () => {
+  startModal.style.opacity = '0';
+  setTimeout(() => {
+    startModal.classList.add('hidden');
+    init();
+    gameRunning = true;
+    gameLoop();
+  }, 300);
+});
 
-        startButton.addEventListener('click', () => {
-            startModal.style.opacity = '0';
-            setTimeout(() => {
-                startModal.classList.add('hidden');
-                init();
-                gameRunning = true;
-                gameLoop();
-            }, 300);
-        });
-
-       restartButton.addEventListener('click', () => {
+restartButton.addEventListener('click', () => {
   gameOverModal.style.opacity = '0';
   setTimeout(() => {
     gameOverModal.classList.add('hidden');
     init();
     gameRunning = true;
-    gameLoop(); // <- adiciona isto
+    gameLoop(); // religar animação
   }, 300);
 });
 
-        continueButton.addEventListener('click', () => {
-            infoModal.style.opacity = '0';
-            setTimeout(() => {
-                infoModal.classList.add('hidden');
-                gameRunning = true;
-            }, 300);
-        });
+continueButton.addEventListener('click', () => {
+  infoModal.style.opacity = '0';
+  setTimeout(() => {
+    infoModal.classList.add('hidden');
+    gameRunning = true;
+  }, 300);
+});
 
-        levelContinueButton.addEventListener('click', () => {
-            levelUpModal.style.opacity = '0';
-            setTimeout(() => {
-                levelUpModal.classList.add('hidden');
-                gameRunning = true;
-            }, 300);
-        });
-
-        // Controles de toque
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            player.targetX = touch.clientX - rect.left;
-        });
-
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            player.targetX = touch.clientX - rect.left;
-        });
-
-        // Controles de mouse
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            player.targetX = e.clientX - rect.left;
-        });
+levelContinueButton.addEventListener('click', () => {
+  levelUpModal.style.opacity = '0';
+  setTimeout(() => {
+    levelUpModal.classList.add('hidden');
+    gameRunning = true;
+  }, 300);
+});
 
         // Redimensionar canvas
         window.addEventListener('resize', resizeCanvas);
