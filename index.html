@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pirarucu Aventureiro</title>
+    <!-- Favicon -->
+<link rel="icon" type="image/png" href="logo.png" sizes="32x32">
+<link rel="apple-touch-icon" href="logo.png">
+<meta name="theme-color" content="#f59e0b">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -68,7 +72,10 @@
         <!-- Cabeçalho com informações -->
         <div class="p-3 bg-blue-200 bg-opacity-80 text-gray-800 flex justify-between items-center z-10">
             <div>
-                <h1 class="text-xl font-bold">Pirarucu Aventureiro</h1>
+      <!-- Dentro do cabeçalho (onde está o <h1 class="text-xl font-bold">) -->
+<div class="flex items-center gap-2">
+  <img src="logo.png" alt="" class="w-8 h-8 object-contain rounded-full">
+  <h1 class="text-xl font-bold">Pirarucu Aventureiro</h1>
                 <div class="text-xs">Jogador: <span id="player-name-display" class="font-bold">-</span></div>
                 <div class="text-xs">Nível: <span id="level">1</span></div>
             </div>
@@ -101,17 +108,18 @@
 
     <!-- Modal de Início -->
     <div id="start-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-20 hidden opacity-0">
-        <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
-            <h2 class="text-2xl font-bold mb-2">🐟 Pirarucu Aventureiro</h2>
-            <p class="mb-4">Você é um Pirarucu, o maior peixe de escamas da Amazônia! Sua missão é alimentar-se, mas cuidado: alguns peixes estão contaminados com mercúrio.</p>
-            <p class="mb-4 font-bold text-green-600">🟢 Peixes Seguros (baixo mercúrio):<br>Tambaqui, Pacu, Aruanã</p>
-            <p class="mb-4 font-bold text-red-600">🔴 Peixes Contaminados (alto mercúrio):<br>Tucunaré, Surubim, Piranha</p>
-            <p class="mb-4 text-sm">Colete peixes seguros para ganhar pontos. Evite os contaminados para não acumular mercúrio!</p>
-            <p class="mb-6 text-sm">Arraste o dedo na tela para mover o Pirarucu.</p>
-            <button id="start-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Começar a Jogar</button>
-        </div>
-    </div>
+       <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+    <img src="logo.png" alt="Pirarucu Aventureiro"
+         class="mx-auto mb-4 w-40 h-40 object-contain rounded-full shadow" />
 
+    <h2 class="text-2xl font-bold mb-2">🐟 Pirarucu Aventureiro</h2>
+    <p class="mb-4">Você é um Pirarucu, o maior peixe de escamas da Amazônia! Sua missão é alimentar-se, mas cuidado: alguns peixes estão contaminados com mercúrio.</p>
+    <p class="mb-4 font-bold text-green-600">🟢 Peixes Seguros (baixo mercúrio):<br>Tambaqui, Pacu, Aruanã</p>
+    <p class="mb-4 font-bold text-red-600">🔴 Peixes Contaminados (alto mercúrio):<br>Tucunaré, Surubim, Piranha</p>
+    <p class="mb-4 text-sm">Colete peixes seguros para ganhar pontos. Evite os contaminados para não acumular mercúrio!</p>
+    <p class="mb-6 text-sm">Arraste o dedo na tela para mover o Pirarucu.</p>
+    <button id="start-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Começar a Jogar</button>
+</div>
     <!-- Modal de Game Over -->
     <div id="game-over-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-20 hidden opacity-0">
         <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
