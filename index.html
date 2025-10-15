@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pirarucu Aventureiro</title>
     <!-- Favicon -->
-<link rel="icon" type="image/png" href="logo.png" sizes="32x32">
+<link rel="icon" type="image/png" href="logo (1).png" sizes="32x32">
 <link rel="apple-touch-icon" href="logo.png">
 <meta name="theme-color" content="#f59e0b">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -57,15 +57,21 @@
 </head>
 <body class="bg-blue-900 flex flex-col items-center justify-center h-screen overflow-hidden">
 
-    <!-- Modal de Nome do Jogador -->
-    <div id="name-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-30">
-        <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
-            <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
-            <p class="mb-4">Digite seu nome para começar:</p>
-            <input type="text" id="player-name-input" placeholder="Seu nome" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20">
-            <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
-            <button id="view-ranking-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
-        </div>
+  <!-- Modal de Nome do Jogador -->
+<div id="name-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-30">
+  <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+    
+    <!-- LOGO -->
+    <img src="logo (1).png" alt="Pirarucu Aventureiro" 
+         class="mx-auto mb-4 w-32 h-32 object-contain rounded-full shadow" />
+
+    <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
+    <p class="mb-4">Digite seu nome para começar:</p>
+    <input type="text" id="player-name-input" placeholder="Seu nome" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20">
+    <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
+    <button id="view-ranking-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
+  </div>
+
     </div>
 
     <div id="game-container" class="w-full max-w-md h-full bg-blue-800 shadow-2xl flex flex-col relative hidden">
@@ -74,7 +80,7 @@
             <div>
       <!-- Dentro do cabeçalho (onde está o <h1 class="text-xl font-bold">) -->
 <div class="flex items-center gap-2">
-  <img src="logo.png" alt="" class="w-8 h-8 object-contain rounded-full">
+  <img src="logo (1).png" alt="" class="w-8 h-8 object-contain rounded-full">
   <h1 class="text-xl font-bold">Pirarucu Aventureiro</h1>
                 <div class="text-xs">Jogador: <span id="player-name-display" class="font-bold">-</span></div>
                 <div class="text-xs">Nível: <span id="level">1</span></div>
@@ -109,7 +115,7 @@
     <!-- Modal de Início -->
     <div id="start-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-20 hidden opacity-0">
        <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
-    <img src="logo.png" alt="Pirarucu Aventureiro"
+    <img src="logo (1).png" alt="Pirarucu Aventureiro"
          class="mx-auto mb-4 w-40 h-40 object-contain rounded-full shadow" />
 
     <h2 class="text-2xl font-bold mb-2">🐟 Pirarucu Aventureiro</h2>
