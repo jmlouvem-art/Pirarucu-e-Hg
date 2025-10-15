@@ -253,10 +253,10 @@
         
         let player, fish, bubbles;
 
-        // Imagens
-        const playerImg = new Image();
-        playerImg.src = 'Pirarucu.png';
-playerImg.onerror = () => console.warn('Imagem do jogador não encontrada: Pirarucu.png');
+      const playerImg = new Image();
+playerImg.src = 'pirarucu.png';
+playerImg.onload  = () => console.log('player ok', playerImg.naturalWidth);
+playerImg.onerror = () => console.warn('Não achei pirarucu.png');
 
         const fishImages = {
             'Tambaqui': new Image(),
@@ -399,15 +399,15 @@ playerImg.onerror = () => console.warn('Imagem do jogador não encontrada: Pirar
         }
         
        // Desenhar jogador (Pirarucu)
-        function drawPlayer(p) {
-            if (playerImg.complete && playerImg.naturalWidth > 0) {
-                ctx.drawImage(playerImg, p.x - p.width / 4, p.y - p.height / 4, p.width, p.height);
-            } else {
-                // Fallback: desenhar retângulo
-                ctx.fillStyle = '#8B7355';
-                ctx.fillRect(p.x - p.width / 4, p.y - p.height / 4, p.width, p.height);
-            }
-        }
+       function drawPlayer(p) {
+  if (playerImg.complete && playerImg.naturalWidth > 0) {
+    ctx.drawImage(playerImg, p.x - p.width/2, p.y - p.height/2, p.width, p.height);
+  } else {
+    ctx.fillStyle = '#8B7355';
+    ctx.fillRect(p.x - p.width/2, p.y - p.height/2, p.width, p.height);
+  }
+}
+
       function drawFish(f) {
                 ctx.save();
                 ctx.translate(f.x, f.y);
