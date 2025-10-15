@@ -61,16 +61,15 @@
 <div id="name-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-30">
   <div class="rounded-lg p-6 text-center shadow-xl max-w-sm w-full bg-cover bg-center" 
        style="background-image: url('Fundo do Lago.png');">
-    
-    <!-- LOGO -->
-    <div class="flex justify-center mb-4">
-      <img src="logo (1).png" alt="Pirarucu Aventureiro"
-           class="w-[210px] h-auto shadow-lg" style="border-radius: 0;" />
-      <!-- ↑ logo aumentada e sem formato redondo -->
-    </div>
 
-    <!-- Caixa branca translúcida -->
+    <!-- Caixa branca translúcida (logo dentro) -->
     <div class="bg-white bg-opacity-80 p-4 shadow-md">
+      <!-- LOGO (sem arredondamento) -->
+      <div class="flex justify-center mb-4">
+        <img src="logo (1).png" alt="Pirarucu Aventureiro"
+             class="w-[210px] h-auto shadow-lg" style="border-radius:0;" />
+      </div>
+
       <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
       <p class="mb-4">Digite seu nome para começar:</p>
       <input type="text" id="player-name-input" placeholder="Seu nome"
@@ -86,22 +85,27 @@
     </div>
   </div>
 </div>
+
     <div id="game-container" class="w-full max-w-md h-full bg-blue-800 shadow-2xl flex flex-col relative hidden">
-        <!-- Cabeçalho com informações -->
-        <div class="p-3 bg-blue-200 bg-opacity-80 text-gray-800 flex justify-between items-center z-10">
-            <div>
-      <!-- Dentro do cabeçalho (onde está o <h1 class="text-xl font-bold">) -->
-<div class="flex items-center gap-2">
-  <img src="logo (1).png" alt="" class="w-8 h-8 object-contain rounded-full">
-  <h1 class="text-xl font-bold">Pirarucu Aventureiro</h1>
-                <div class="text-xs">Jogador: <span id="player-name-display" class="font-bold">-</span></div>
-                <div class="text-xs">Nível: <span id="level">1</span></div>
-            </div>
-            <div>
-                <div class="font-bold">Pontos: <span id="score">0</span></div>
-                <div class="text-xs">Recorde: <span id="high-score">0</span></div>
-            </div>
-        </div>
+       <!-- Cabeçalho com informações -->
+<div class="p-3 bg-blue-200 bg-opacity-80 text-gray-800 flex justify-between items-center z-10">
+  <!-- Esquerda: logo + título + jogador/nível -->
+  <div class="flex items-center gap-2">
+    <img src="logo (1).png" alt="Logo" class="w-8 h-8 object-contain" style="border-radius:0;">
+    <div class="leading-tight">
+      <h1 class="text-xl font-bold">Pirarucu Aventureiro</h1>
+      <div class="text-xs">Jogador: <span id="player-name-display" class="font-bold">-</span></div>
+      <div class="text-xs">Nível: <span id="level">1</span></div>
+    </div>
+  </div>
+
+  <!-- Direita: pontuação -->
+  <div class="text-right">
+    <div class="font-bold">Pontos: <span id="score">0</span></div>
+    <div class="text-xs">Recorde: <span id="high-score">0</span></div>
+  </div>
+</div>
+</div>
 
         <!-- Canvas do Jogo -->
         <canvas id="gameCanvas" class="flex-grow w-full absolute top-0 left-0"></canvas>
