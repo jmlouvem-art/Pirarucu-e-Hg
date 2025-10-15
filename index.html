@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pirarucu: O Guardião do Rio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            touch-action: none;
+        }
+        canvas {
+            background-image: url('Fundo do lago.png');
+            background-size: cover;
+            background-position: center;
+        }
+        .modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulsing {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: particleFade 1s ease-out forwards;
+        }
+        @keyframes particleFade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.5) translateY(-50px); }
+        }
+        .ranking-entry {
+            transition: all 0.3s ease;
+        }
+        .ranking-entry:hover {
+            transform: scale(1.02);
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-blue-900 flex flex-col items-center justify-center h-screen overflow-hidden">
+
+    <!-- Modal de Nome do Jogador -->
+    <div id="name-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-30">
+        <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+            <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
+            <p class="mb-4">Digite seu nome para começar:</p>
+            <input type="text" id="player-name-input" placeholder="Seu nome" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20">
+            <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
+            <button id="view-ranking-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
+        </div>
+    </div>
+
+    <div id="game-container" class="w-full max-w-md h-full bg-blue-800 shadow-2xl flex flex-col relative hidden">
+        <!-- Cabeçalho com informações -->
+        <div class="p-3 bg-blue-200 bg-opacity-80 text-gray-800 flex justify-between items-center z-10">
+            <div>
+                <h1 class="text-xl font-bold">Pirarucu: O Guardião do Rio</h1>
+                <div class="text-xs">Jogador: <span id="player-name-display" class="font-bold">-</span></div>
+                <div class="text-xs">Nível: <span id="level">1</span></div>
+            </div>
+            <div>
+                <div class="font-bold">Pontos: <span id="score">0</span></div>
+                <div class="text-xs">Recorde: <span id="high-score">0</span></div>
+            </div>
+        </div>
+
+        <!-- Canvas do Jogo -->
+        <canvas id="gameCanvas" class="flex-grow w-full absolute top-0 left-0"></canvas>
+        
+        <!-- Barra de Contaminação Vertical -->
+        <div class="absolute top-24 right-3 w-12 text-center z-10">
+            <div class="text-white text-sm font-bold mb-1" title="Mercúrio">Hg</div>
+            <div class="relative h-64 w-6 bg-white bg-opacity-30 rounded-full overflow-hidden mx-auto border-2 border-white/50">
+                <div id="mercury-bar" class="absolute bottom-0 w-full bg-red-600 transition-all duration-300" style="height: 0%;"></div>
+            </div>
+            <div class="text-white text-xs mt-1"><span id="mercury-percent">0</span>%</div>
+        </div>
+
+        <!-- Mensagens do Jogo -->
+        <div id="game-message" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl font-bold z-20 transition-opacity duration-1000 opacity-0 pointer-events-none text-center drop-shadow-lg">
+        </div>
+
+        <!-- Fatos Educacionais -->
+        <div id="fact-display" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-black bg-opacity-70 text-white text-sm p-3 rounded-lg max-w-xs text-center z-10 opacity-0 transition-opacity duration-500 pointer-events-none">
+        </div>
+    </div>
+
+    <!-- Modal de Início -->
+    <div id="start-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-20 hidden opacity-0">
+        <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+            <h2 class="text-2xl font-bold mb-2">🐟 Pirarucu: O Guardião do Rio</h2>
+            <p class="mb-4">Você é um Pirarucu, o maior peixe de escamas da Amazônia! Sua missão é alimentar-se, mas cuidado: alguns peixes estão contaminados com mercúrio.</p>
+            <p class="mb-4 font-bold text-green-600">🟢 Peixes Seguros (baixo mercúrio):<br>Tambaqui, Pacu, Aruanã</p>
+            <p class="mb-4 font-bold text-red-600">🔴 Peixes Contaminados (alto mercúrio):<br>Tucunaré, Surubim, Piranha</p>
+            <p class="mb-4 text-sm">Colete peixes seguros para ganhar pontos. Evite os contaminados para não acumular mercúrio!</p>
+            <p class="mb-6 text-sm">Arraste o dedo na tela para mover o Pirarucu.</p>
+            <button id="start-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Começar a Jogar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Game Over -->
+    <div id="game-over-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-20 hidden opacity-0">
+        <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+            <h2 class="text-2xl font-bold mb-2 text-red-600">Fim de Jogo</h2>
+            <p id="game-over-reason" class="mb-4">A contaminação por mercúrio atingiu um nível crítico. Isso é o que acontece com os peixes na Amazônia.</p>
+            <p class="mb-2 text-sm">O mercúrio se acumula na cadeia alimentar, chegando até os seres humanos e causando graves problemas de saúde.</p>
+            <div id="new-record-message" class="mb-4 p-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg hidden">
+                <p class="text-lg font-bold text-yellow-700">🎉 Novo Recorde Pessoal! 🎉</p>
+            </div>
+            <p class="mb-2">Jogador: <span id="final-player-name" class="font-bold">-</span></p>
+            <p class="mb-2">Sua pontuação final: <span id="final-score" class="font-bold text-blue-600">0</span></p>
+            <p class="mb-4">Nível alcançado: <span id="final-level" class="font-bold">1</span></p>
+            <button id="restart-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Jogar Novamente</button>
+            <button id="view-ranking-gameover-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
+        </div>
+    </div>
+
+    <!-- Modal de Informação Educacional -->
+    <div id="info-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-20 hidden opacity-0">
+        <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+            <h2 class="text-2xl font-bold mb-2">📚 Bioacumulação</h2>
+            <p class="mb-4">Peixes carnívoros, como o Tucunaré e o Surubim, acumulam mais mercúrio porque comem outros peixes contaminados.</p>
+            <p class="mb-4">Isso é chamado de <strong>bioacumulação</strong>. Quanto maior o peixe na cadeia alimentar, maior a concentração de mercúrio em seu corpo.</p>
+            <button id="continue-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Entendi, continuar!</button>
+        </div>
+    </div>
+
+    <!-- Modal de Subida de Nível -->
+    <div id="level-up-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-20 hidden opacity-0">
+        <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+            <h2 class="text-2xl font-bold mb-2 text-green-600">🎉 Nível <span id="new-level">2</span>!</h2>
+            <p class="mb-4">Parabéns! Você subiu de nível. Os peixes agora caem mais rápido!</p>
+            <button id="level-continue-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg w-full">Continuar</button>
+        </div>
+    </div>
+
+    <!-- Modal de Ranking -->
+    <div id="ranking-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-20 hidden opacity-0">
+        <div class="bg-white rounded-lg p-6 shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+            <h2 class="text-2xl font-bold mb-4 text-center">🏆 Ranking de Jogadores</h2>
+            <div id="ranking-list" class="space-y-2">
+                <!-- Ranking será preenchido aqui -->
+            </div>
+            <button id="close-ranking-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mt-4">Fechar</button>
+        </div>
+    </div>
+
+    <script>
+        // Elementos do DOM
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const highScoreEl = document.getElementById('high-score');
+        const levelEl = document.getElementById('level');
+        const mercuryBarEl = document.getElementById('mercury-bar');
+        const mercuryPercentEl = document.getElementById('mercury-percent');
+        const gameContainer = document.getElementById('game-container');
+        const gameMessageEl = document.getElementById('game-message');
+        const factDisplayEl = document.getElementById('fact-display');
+        const playerNameDisplayEl = document.getElementById('player-name-display');
+        
+        const nameModal = document.getElementById('name-modal');
+        const startModal = document.getElementById('start-modal');
+        const gameOverModal = document.getElementById('game-over-modal');
+        const infoModal = document.getElementById('info-modal');
+        const levelUpModal = document.getElementById('level-up-modal');
+        const rankingModal = document.getElementById('ranking-modal');
+        
+        const playerNameInput = document.getElementById('player-name-input');
+        const nameSubmitButton = document.getElementById('name-submit-button');
+        const viewRankingButton = document.getElementById('view-ranking-button');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const continueButton = document.getElementById('continue-button');
+        const levelContinueButton = document.getElementById('level-continue-button');
+        const viewRankingGameoverButton = document.getElementById('view-ranking-gameover-button');
+        const closeRankingButton = document.getElementById('close-ranking-button');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalLevelEl = document.getElementById('final-level');
+        const finalPlayerNameEl = document.getElementById('final-player-name');
+        const newLevelEl = document.getElementById('new-level');
+        const gameOverReasonEl = document.getElementById('game-over-reason');
+        const newRecordMessageEl = document.getElementById('new-record-message');
+        const rankingListEl = document.getElementById('ranking-list');
+
+        // Configurações do jogo
+        let score = 0;
+        let highScore = 0;
+        let level = 1;
+        let mercuryLevel = 0;
+        let gameRunning = false;
+        let infoPopupShown = false;
+        let playerName = '';
+        
+        let player, fish, bubbles;
+
+        // Imagens
+        const playerImg = new Image();
+        playerImg.src = 'Pirarucu.png';
+
+        const fishImages = {
+            'Tambaqui': new Image(),
+            'Pacu': new Image(),
+            'Aruanã': new Image(),
+            'Jaraqui': new Image(),
+            'Tucunaré': new Image(),
+            'Surubim': new Image(),
+            'Piranha': new Image(),
+            'Piraputanga': new Image(),
+            'Castanha': new Image()
+        };
+
+        fishImages['Tambaqui'].src = 'Tambaqui.png';
+        fishImages['Pacu'].src = 'Pacu.png';
+        fishImages['Aruanã'].src = 'Aruanã.png';
+        fishImages['Tucunaré'].src = 'Tucunaré.png';
+        fishImages['Surubim'].src = 'Surubim.png';
+        fishImages['Piranha'].src = 'Piranha.png';
+        fishImages["Castanha"].src = "Castanha.png";
+
+        // Dados de peixes baseados em pesquisa real
+        const fishData = {
+            safe: [
+                { name: 'Tambaqui', points: 10, mercury: 5, color: '#FFD700' },
+                { name: 'Pacu', points: 10, mercury: 5, color: '#FFA500' },
+                { name: 'Aruanã', points: 15, mercury: 8, color: '#FFFF00' },
+                { name: 'Castanha', points: 20, mercury: -10, color: '#8B4513' }
+            ],
+            contaminated: [
+                { name: 'Tucunaré', points: -5, mercury: 25, color: '#8B0000' },
+                { name: 'Surubim', points: -5, mercury: 30, color: '#A52A2A' },
+                { name: 'Piranha', points: -5, mercury: 20, color: '#DC143C' },
+               
+            ]
+        };
+
+        // Fatos educacionais
+        const educationalFacts = [
+            "Peixes carnívoros acumulam 6,5x mais mercúrio que herbívoros.",
+            "21,3% dos peixes comercializados na Amazônia têm níveis perigosos de mercúrio.",
+            "O mercúrio é usado no garimpo para separar o ouro do sedimento.",
+            "A contaminação por mercúrio afeta principalmente povos indígenas e ribeirinhos.",
+            "O mercúrio pode causar danos neurológicos permanentes em humanos.",
+            "Mulheres grávidas e crianças são mais vulneráveis aos efeitos do mercúrio.",
+            "O mercúrio pode permanecer no ambiente por décadas.",
+            "200 toneladas de mercúrio são lançadas nos rios da Amazônia anualmente."
+        ];
+
+        let lastFactTime = 0;
+        const factInterval = 15000;
+
+        // Funções de Ranking
+        function getRanking() {
+            const ranking = localStorage.getItem('pirarucu_ranking');
+            return ranking ? JSON.parse(ranking) : [];
+        }
+
+        function saveRanking(ranking) {
+            localStorage.setItem('pirarucu_ranking', JSON.stringify(ranking));
+        }
+
+        function addToRanking(name, score, level) {
+            const ranking = getRanking();
+            ranking.push({
+                name: name,
+                score: score,
+                level: level,
+                date: Date.now()
+            });
+            ranking.sort((a, b) => b.score - a.score);
+            const top10 = ranking.slice(0, 10);
+            saveRanking(top10);
+        }
+
+        function displayRanking() {
+            const ranking = getRanking();
+            rankingListEl.innerHTML = '';
+            
+            if (ranking.length === 0) {
+                rankingListEl.innerHTML = '<p class="text-center text-gray-500">Nenhum registro ainda. Seja o primeiro!</p>';
+                return;
+            }
+            
+            ranking.forEach((entry, index) => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'ranking-entry p-3 rounded-lg border-2 border-gray-200 flex justify-between items-center';
+                
+                if (index === 0) {
+                    entryDiv.classList.add('border-yellow-400', 'bg-yellow-50');
+                } else if (index === 1) {
+                    entryDiv.classList.add('border-gray-400', 'bg-gray-50');
+                } else if (index === 2) {
+                    entryDiv.classList.add('border-orange-400', 'bg-orange-50');
+                }
+                
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}º`;
+                const date = new Date(entry.date).toLocaleDateString('pt-BR');
+                
+                entryDiv.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="text-xl font-bold">${medal}</span>
+                        <div>
+                            <div class="font-bold">${entry.name}</div>
+                            <div class="text-xs text-gray-500">${date}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-blue-600">${entry.score} pts</div>
+                        <div class="text-xs text-gray-500">Nível ${entry.level}</div>
+                    </div>
+                `;
+                
+                rankingListEl.appendChild(entryDiv);
+            });
+        }
+
+        function getPlayerHighScore(name) {
+            const ranking = getRanking();
+            const playerScores = ranking.filter(entry => entry.name === name);
+            if (playerScores.length === 0) return 0;
+            return Math.max(...playerScores.map(entry => entry.score));
+        }
+
+        // Função para dimensionar o canvas
+        function resizeCanvas() {
+            canvas.width = gameContainer.clientWidth;
+            canvas.height = gameContainer.clientHeight;
+        }
+
+        // Desenhar bolhas de fundo
+        function drawBubble(b) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        }
+        
+       // Desenhar jogador (Pirarucu)
+        function drawPlayer(p) {
+            if (playerImg.complete && playerImg.naturalWidth > 0) {
+                ctx.drawImage(playerImg, p.x - p.width / 4, p.y - p.height / 4, p.width, p.height);
+            } else {
+                // Fallback: desenhar retângulo
+                ctx.fillStyle = '#8B7355';
+                ctx.fillRect(p.x - p.width / 4, p.y - p.height / 4, p.width, p.height);
+            }
+        }
+      function drawFish(f) {
+                ctx.save();
+                ctx.translate(f.x, f.y);
+
+                // 🎨 Halo super sutil
+                if (f.data.mercury > 15) {
+                    // Peixe contaminado → vermelho fraco
+                    ctx.shadowColor = 'rgba(255, 0, 0, 0.6)';
+                    ctx.shadowBlur = 8;
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.12)';
+                } else if (f.data.mercury < 0) {
+                    // Castanha → dourado suave
+                    ctx.shadowColor = 'rgba(255, 215, 0, 0.6)';
+                    ctx.shadowBlur = 8;
+                    ctx.fillStyle = 'rgba(255, 215, 0, 0.15)';
+                } else {
+                    // Peixe seguro → verde suave
+                    ctx.shadowColor = 'rgba(0, 255, 100, 0.6)';
+                    ctx.shadowBlur = 8;
+                    ctx.fillStyle = 'rgba(0, 255, 100, 0.12)';
+                }
+
+                // 🟢 Halo bem justo (quase colado no peixe)
+                ctx.beginPath();
+                ctx.arc(0, 0, f.width / 2 - 8, 0, Math.PI * 2); // 👈 círculo menor
+                ctx.fill();
+
+                ctx.shadowBlur = 0;
+
+                // 🐟 Desenha o peixe
+                const img = fishImages[f.data.name];
+                if (img && img.complete && img.naturalWidth > 0) {
+                    ctx.drawImage(img, -f.width / 2, -f.height / 2, f.width, f.height);
+                } else {
+                    ctx.fillStyle = f.data.color;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, f.width / 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // Nome do peixe (opcional)
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 10px Nunito';
+                ctx.textAlign = 'center';
+                ctx.fillText(f.data.name, 0, -f.height / 2 - 8);
+
+                ctx.restore();
+            }
+
+        // Resetar e iniciar o jogo
+        function init() {
+            resizeCanvas();
+            score = 0;
+            level = 1;
+            mercuryLevel = 0;
+            infoPopupShown = false;
+            lastFactTime = Date.now();
+            highScore = getPlayerHighScore(playerName);
+            updateHUD();
+
+            // NOVO CÓDIGO
+            player = { x: canvas.width / 2, y: canvas.height - 80, width: 100, height: 100, targetX: canvas.width / 2 };
+            fish = [];
+            bubbles = [];
+            
+            for (let i = 0; i < 15; i++) {
+                bubbles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 10 + 5,
+                    speed: Math.random() * 0.5 + 0.2
+                });
+            }
+        }
+
+        // Atualizar HUD
+        function updateHUD() {
+            scoreEl.textContent = score;
+            highScoreEl.textContent = highScore;
+            levelEl.textContent = level;
+            mercuryBarEl.style.height = mercuryLevel + '%';
+            mercuryPercentEl.textContent = Math.round(mercuryLevel);
+        }
+
+        // Criar peixe
+        function createFish() {
+            let fishType;
+            let castanhaChance = 0.05; // 5% de chance padrão
+            if (mercuryLevel >= 50) {
+                castanhaChance = 0.2; // 20% de chance se o mercúrio estiver alto
+            }
+
+            if (Math.random() < castanhaChance) {
+                fishType = fishData.safe.find(f => f.name === 'Castanha');
+            } else {
+                const isSafe = Math.random() < 0.6;
+                const fishArray = isSafe ? fishData.safe : fishData.contaminated;
+                fishType = fishArray[Math.floor(Math.random() * fishArray.length)];
+            }
+            
+            let fishWidth = 120;
+            let fishHeight = 120;
+
+            // Ajustar tamanho da castanha para ser menor
+            if (fishType.name === 'Castanha') {
+                fishWidth = 60;
+                fishHeight = 60;
+            }
+            
+            fish.push({
+                x: Math.random() * (canvas.width - fishWidth) + fishWidth / 2,
+                y: -fishHeight,
+                width: fishWidth,
+                height: fishHeight,
+                speed: 0.8 + level * 0.2,
+                data: fishType
+            });
+        }
+
+        // Verificar colisão
+        // NOVO CóDIGO (Circular/Oval e mais justa)
+        function checkCollision(p, f) {
+            const dx = p.x - f.x;
+            const dy = p.y - f.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // Criamos uma "hitbox" um pouco menor que a imagem para ser mais justo.
+            // O jogador precisa "realmente" tocar no peixe.
+            const collisionDistance = (p.width / 3) + (f.width / 3);
+
+            return distance < collisionDistance;
+        }
+
+        // Atualizar jogo
+        function update() {
+            if (!gameRunning) return;
+
+            // Atualizar posição do jogador
+            player.x += (player.targetX - player.x) * 0.1;
+
+            // Atualizar bolhas
+            bubbles.forEach(b => {
+                b.y -= b.speed;
+                if (b.y < -20) b.y = canvas.height + 20;
+            });
+
+            // Atualizar peixes
+            fish.forEach((f, index) => {
+                f.y += f.speed;
+
+                // Verificar colisão
+                if (checkCollision(player, f)) {
+                    score += f.data.points;
+
+                    // Verifica o tipo de peixe para aplicar o efeito correto
+                    if (f.data.name === 'Castanha') {
+                        // Castanha remove mercúrio
+                        mercuryLevel += f.data.mercury; // (mercury é -10, então subtrai)
+                        showMessage(`Mercúrio ${f.data.mercury}%`, '#00FF00');
+                        createParticles(f.x, f.y, '#00FF00');
+                    } else if (f.data.mercury > 15) {
+                        // Peixes contaminados adicionam mercúrio
+                        mercuryLevel += f.data.mercury;
+                        showMessage(`+${f.data.points} / +${f.data.mercury}% Hg!`, '#FF4500'); // Mensagem corrigida
+                        createParticles(f.x, f.y, '#FF4500');
+                    } else {
+                        // Peixes seguros apenas dão pontos
+                        showMessage(`+${f.data.points} pts!`, '#00FF7F');
+                        createParticles(f.x, f.y, '#00FF7F');
+                    }
+
+                    // Garante que o mercúrio fique entre 0 e 100
+                    mercuryLevel = Math.max(0, Math.min(100, mercuryLevel));
+                    
+                    updateHUD();
+                    fish.splice(index, 1); // Remove o peixe
+                    
+                    // Checagens de fim de jogo e nível
+                    if (mercuryLevel >= 100) {
+                        gameOver();
+                        return; // Para o loop deste frame para evitar erros
+                    }
+                    
+                    if (score >= level * 100 && !infoPopupShown && level === 1) {
+                        showInfoModal();
+                    }
+                    
+                    if (score >= level * 150) {
+                        levelUp();
+                    }
+                }
+
+                if (f.y > canvas.height + 50) {
+                    fish.splice(index, 1);
+                }
+            });
+
+            if (Math.random() < 0.01 + level * 0.005) {
+                createFish();
+            }
+            
+            if (Date.now() - lastFactTime > factInterval) {
+                showFact();
+                lastFactTime = Date.now();
+            }
+        }
+
+        // Desenhar tudo
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            bubbles.forEach(drawBubble);
+            fish.forEach(drawFish);
+            drawPlayer(player);
+        }
+
+        // Loop do jogo
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Mostrar mensagem temporária
+        function showMessage(text, color) {
+            gameMessageEl.textContent = text;
+            gameMessageEl.style.color = color;
+            gameMessageEl.style.opacity = '1';
+            setTimeout(() => {
+                gameMessageEl.style.opacity = '0';
+            }, 1000);
+        }
+
+        // Criar partículas
+        function createParticles(x, y, color) {
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.width = '5px';
+                particle.style.height = '5px';
+                particle.style.backgroundColor = color;
+                particle.style.borderRadius = '50%';
+                gameContainer.appendChild(particle);
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        // Mostrar fato educacional
+        function showFact() {
+            const fact = educationalFacts[Math.floor(Math.random() * educationalFacts.length)];
+            factDisplayEl.textContent = fact;
+            factDisplayEl.style.opacity = '1';
+            setTimeout(() => {
+                factDisplayEl.style.opacity = '0';
+            }, 5000);
+        }
+
+        // Mostrar modal informativo
+        function showInfoModal() {
+            infoPopupShown = true;
+            gameRunning = false;
+            infoModal.classList.remove('hidden');
+            setTimeout(() => {
+                infoModal.style.opacity = '1';
+            }, 10);
+        }
+
+        // Subir de nível
+        function levelUp() {
+            level++;
+            gameRunning = false;
+            newLevelEl.textContent = level;
+            levelUpModal.classList.remove('hidden');
+            setTimeout(() => {
+                levelUpModal.style.opacity = '1';
+            }, 10);
+        }
+
+        // Game Over
+        function gameOver() {
+            gameRunning = false;
+            finalScoreEl.textContent = score;
+            finalLevelEl.textContent = level;
+            finalPlayerNameEl.textContent = playerName;
+            
+            if (score > highScore) {
+                newRecordMessageEl.classList.remove('hidden');
+            } else {
+                newRecordMessageEl.classList.add('hidden');
+            }
+            
+            addToRanking(playerName, score, level);
+            
+            gameOverModal.classList.remove('hidden');
+            setTimeout(() => {
+                gameOverModal.style.opacity = '1';
+            }, 10);
+        }
+
+        // Event Listeners
+        nameSubmitButton.addEventListener('click', () => {
+            const name = playerNameInput.value.trim();
+            if (name) {
+                playerName = name;
+                playerNameDisplayEl.textContent = playerName;
+                nameModal.style.opacity = '0';
+                setTimeout(() => {
+                    nameModal.classList.add('hidden');
+                    gameContainer.classList.remove('hidden');
+                    startModal.classList.remove('hidden');
+                    setTimeout(() => {
+                        startModal.style.opacity = '1';
+                    }, 10);
+                }, 300);
+            } else {
+                alert('Por favor, digite seu nome!');
+            }
+        });
+
+        viewRankingButton.addEventListener('click', () => {
+            displayRanking();
+            rankingModal.classList.remove('hidden');
+            setTimeout(() => {
+                rankingModal.style.opacity = '1';
+            }, 10);
+        });
+
+        viewRankingGameoverButton.addEventListener('click', () => {
+            displayRanking();
+            gameOverModal.style.opacity = '0';
+            setTimeout(() => {
+                gameOverModal.classList.add('hidden');
+                rankingModal.classList.remove('hidden');
+                setTimeout(() => {
+                    rankingModal.style.opacity = '1';
+                }, 10);
+            }, 300);
+        });
+
+        closeRankingButton.addEventListener('click', () => {
+            rankingModal.style.opacity = '0';
+            setTimeout(() => {
+                rankingModal.classList.add('hidden');
+                if (gameRunning || fish.length > 0) {
+                    // Voltar ao jogo
+                } else {
+                    // Voltar ao menu inicial
+                    nameModal.classList.remove('hidden');
+                    setTimeout(() => {
+                        nameModal.style.opacity = '1';
+                    }, 10);
+                }
+            }, 300);
+        });
+
+        startButton.addEventListener('click', () => {
+            startModal.style.opacity = '0';
+            setTimeout(() => {
+                startModal.classList.add('hidden');
+                init();
+                gameRunning = true;
+                gameLoop();
+            }, 300);
+        });
+
+        restartButton.addEventListener('click', () => {
+            gameOverModal.style.opacity = '0';
+            setTimeout(() => {
+                gameOverModal.classList.add('hidden');
+                init();
+                gameRunning = true;
+            }, 300);
+        });
+
+        continueButton.addEventListener('click', () => {
+            infoModal.style.opacity = '0';
+            setTimeout(() => {
+                infoModal.classList.add('hidden');
+                gameRunning = true;
+            }, 300);
+        });
+
+        levelContinueButton.addEventListener('click', () => {
+            levelUpModal.style.opacity = '0';
+            setTimeout(() => {
+                levelUpModal.classList.add('hidden');
+                gameRunning = true;
+            }, 300);
+        });
+
+        // Controles de toque
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            player.targetX = touch.clientX - rect.left;
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            player.targetX = touch.clientX - rect.left;
+        });
+
+        // Controles de mouse
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            player.targetX = e.clientX - rect.left;
+        });
+
+        // Redimensionar canvas
+        window.addEventListener('resize', resizeCanvas);
+    </script>
+</body>
+</html>
+
