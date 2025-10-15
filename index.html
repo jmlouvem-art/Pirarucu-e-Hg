@@ -57,19 +57,20 @@
 </head>
 <body class="bg-blue-900 flex flex-col items-center justify-center h-screen overflow-hidden">
 
-  <!-- Modal de Nome do Jogador -->
+<!-- Modal de Nome do Jogador -->
 <div id="name-modal" class="modal absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-30">
   <div class="rounded-lg p-6 text-center shadow-xl max-w-sm w-full bg-cover bg-center" 
        style="background-image: url('Fundo do Lago.png');">
     
     <!-- LOGO -->
     <div class="flex justify-center mb-4">
-      <img src="logo.png" alt="Pirarucu Aventureiro"
-           class="w-[194px] h-auto shadow-lg" />
-      <!-- (era ~192 px antes → +2 px no tamanho total) -->
+      <img src="logo (1).png" alt="Pirarucu Aventureiro"
+           class="w-[210px] h-auto shadow-lg" style="border-radius: 0;" />
+      <!-- ↑ logo aumentada e sem formato redondo -->
     </div>
 
-    <div class="bg-white bg-opacity-80 rounded-lg p-4 shadow-md">
+    <!-- Caixa branca translúcida -->
+    <div class="bg-white bg-opacity-80 p-4 shadow-md">
       <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
       <p class="mb-4">Digite seu nome para começar:</p>
       <input type="text" id="player-name-input" placeholder="Seu nome"
@@ -84,6 +85,7 @@
       </button>
     </div>
   </div>
+</div>
     <div id="game-container" class="w-full max-w-md h-full bg-blue-800 shadow-2xl flex flex-col relative hidden">
         <!-- Cabeçalho com informações -->
         <div class="p-3 bg-blue-200 bg-opacity-80 text-gray-800 flex justify-between items-center z-10">
