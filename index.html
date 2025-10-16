@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -28,147 +28,158 @@
     .particle { position:absolute; pointer-events:none; animation:particleFade 1s ease-out forwards; }
     .ranking-entry { transition: all .3s ease; }
     .ranking-entry:hover { transform: scale(1.02); background-color: rgba(59,130,246,0.1); }
+
+    /* --- NOVO: animação do selo no HUD --- */
+    @keyframes hudFade {
+      0% { opacity: 0; transform: translateY(-2px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-2px); }
+    }
+    .hud-note-show {
+      animation: hudFade 3s ease-in-out forwards;
+    }
   </style>
 </head>
 <body class="bg-blue-900 flex flex-col items-center justify-center min-h-[100svh] overflow-hidden">
 
   <!-- Modal de Nome do Jogador -->
-<!-- Name modal -->
-<div id="name-modal"
-     class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120]">
-    <div class="rounded-lg p-6 text-center shadow-xl max-w-sm w-full bg-cover bg-center"
-         style="background-image: url('Fundo do Lago.png');">
-      <div class="bg-white bg-opacity-80 p-4 shadow-md">
-        <div class="flex justify-center mb-4">
-          <img src="logo 2.png" alt="Pirarucu Aventureiro" class="w-[210px] h-auto shadow-lg" style="border-radius:0;"/>
+  <!-- Name modal -->
+  <div id="name-modal"
+       class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120]">
+      <div class="rounded-lg p-6 text-center shadow-xl max-w-sm w-full bg-cover bg-center"
+           style="background-image: url('Fundo do Lago.png');">
+        <div class="bg-white bg-opacity-80 p-4 shadow-md">
+          <div class="flex justify-center mb-4">
+            <img src="logo 2.png" alt="Pirarucu Aventureiro" class="w-[210px] h-auto shadow-lg" style="border-radius:0;"/>
+          </div>
+          <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
+          <p class="mb-4">Digite seu nome para começar:</p>
+          <input type="text" id="player-name-input" placeholder="Seu nome"
+                 class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20">
+          <button id="name-submit-button"
+                  class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
+          <button id="view-ranking-button"
+                  class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
         </div>
-        <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
-        <p class="mb-4">Digite seu nome para começar:</p>
-        <input type="text" id="player-name-input" placeholder="Seu nome"
-               class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20">
-        <button id="name-submit-button"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
-        <button id="view-ranking-button"
-                class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
       </div>
-    </div>
   </div>
 
   <!-- Container do jogo -->
- <!-- SUBSTITUA esta linha inteira -->
-<div id="game-container"
-     class="hidden relative bg-blue-800 shadow-2xl flex flex-col
-            w-[min(92vw,900px)] h-[min(85vh,900px)]
-            md:w-[min(85vw,1000px)] md:h-[min(85vh,1000px)]
-            lg:w-[min(80vw,1100px)] lg:h-[min(85vh,1100px)]">
+  <div id="game-container"
+       class="hidden relative bg-blue-800 shadow-2xl flex flex-col
+              w-[min(92vw,900px)] h-[min(85vh,900px)]
+              md:w-[min(85vw,1000px)] md:h-[min(85vh,1000px)]
+              lg:w-[min(80vw,1100px)] lg:h-[min(85vh,1100px)]">
 
-    <!-- HUD -->
-   <div class="p-3 bg-blue-200/80 text-gray-800 flex justify-between items-center z-20">
-      <div class="flex items-center gap-2">
-        <img src="logo 2.png" alt="Logo" class="w-8 h-8 object-contain" style="border-radius:0;">
-        <div class="leading-tight">
-          <h1 class="text-xl font-bold">Pirarucu Aventureiro</h1>
-          <div class="text-xs">Jogador: <span id="player-name-display" class="font-bold">-</span></div>
-          <div class="text-xs">Nível: <span id="level">1</span></div>
+      <!-- HUD -->
+      <div class="p-3 bg-blue-200/80 text-gray-800 flex justify-between items-center z-20">
+        <div class="flex items-center gap-2">
+          <img src="logo 2.png" alt="Logo" class="w-8 h-8 object-contain" style="border-radius:0;">
+          <div class="leading-tight">
+            <h1 class="text-xl font-bold">Pirarucu Aventureiro</h1>
+            <div class="text-xs">Jogador: <span id="player-name-display" class="font-bold">-</span></div>
+
+            <!-- ALTERADO: Nível + selo discreto -->
+            <div class="text-xs flex items-center gap-2">
+              Nível: <span id="level">1</span>
+              <span id="hud-note"
+                    class="hidden px-2 py-0.5 rounded-full text-white text-[10px] font-bold leading-none select-none">
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="font-bold">Pontos: <span id="score">0</span></div>
+          <div class="text-xs">Recorde: <span id="high-score">0</span></div>
         </div>
       </div>
-      <div class="text-right">
-        <div class="font-bold">Pontos: <span id="score">0</span></div>
-        <div class="text-xs">Recorde: <span id="high-score">0</span></div>
+
+      <!-- Canvas -->
+      <canvas id="gameCanvas" class="flex-1 w-full"></canvas>
+
+      <!-- Barra de contaminação (sem capturar clique) -->
+      <div class="absolute top-24 right-3 w-12 text-center z-10 pointer-events-none">
+        <div class="text-white text-sm font-bold mb-1" title="Mercúrio">Hg</div>
+        <div class="relative h-64 w-6 bg-white bg-opacity-30 rounded-full overflow-hidden mx-auto border-2 border-white/50">
+          <div id="mercury-bar" class="absolute bottom-0 w-full bg-red-600 transition-all duration-300" style="height:0%;"></div>
+        </div>
+        <div class="text-white text-xs mt-1"><span id="mercury-percent">0</span>%</div>
       </div>
-    </div>
 
-    <!-- Canvas -->
-    <canvas id="gameCanvas" class="flex-1 w-full"></canvas>
+      <!-- Mensagens / Fatos -->
+      <div id="game-message" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl font-bold z-20 transition-opacity duration-1000 opacity-0 pointer-events-none text-center drop-shadow-lg"></div>
+      <div id="fact-display" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-black bg-opacity-70 text-white text-sm p-3 rounded-lg max-w-xs text-center z-10 opacity-0 transition-opacity duration-500 pointer-events-none"></div>
+  </div>
 
-    <!-- Barra de contaminação (sem capturar clique) -->
-    <div class="absolute top-24 right-3 w-12 text-center z-10 pointer-events-none">
-      <div class="text-white text-sm font-bold mb-1" title="Mercúrio">Hg</div>
-      <div class="relative h-64 w-6 bg-white bg-opacity-30 rounded-full overflow-hidden mx-auto border-2 border-white/50">
-        <div id="mercury-bar" class="absolute bottom-0 w-full bg-red-600 transition-all duration-300" style="height:0%;"></div>
+  <!-- Modal de Início (mantido) -->
+  <div id="start-modal"
+       class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
+      <div class="bg-white rounded-lg p-6 text-center shadow-xl w-full max-w-md mx-auto">
+        <img src="logo 2.png" alt="Pirarucu Aventureiro" class="mx-auto mb-4 w-40 h-auto shadow" style="border-radius:0;">
+        <h2 class="text-2xl font-bold mb-2">🐟 Pirarucu Aventureiro</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-4">
+          <p class="font-bold text-green-600">🟢 Peixes Seguros:<br>Tambaqui, Pacu, Aruanã</p>
+          <p class="font-bold text-red-600">🔴 Contaminados:<br>Tucunaré, Surubim, Piranha</p>
+        </div>
+        <p class="mb-3 text-sm">Colete peixes seguros e evite os contaminados para não acumular mercúrio!</p>
+        <p class="mb-6 text-sm">Arraste o dedo ou o mouse para mover o Pirarucu.</p>
+        <button id="start-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Começar a Jogar</button>
+        <p class="mt-4 text-xs text-gray-500">
+          Desenvolvido por <strong>Júlia Maretti Louvem</strong> e <strong>Yan Ribeiro de Paiva</strong>
+        </p>
       </div>
-      <div class="text-white text-xs mt-1"><span id="mercury-percent">0</span>%</div>
-    </div>
-
-    <!-- Mensagens / Fatos -->
-    <div id="game-message" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl font-bold z-20 transition-opacity duration-1000 opacity-0 pointer-events-none text-center drop-shadow-lg"></div>
-    <div id="fact-display" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-black bg-opacity-70 text-white text-sm p-3 rounded-lg max-w-xs text-center z-10 opacity-0 transition-opacity duration-500 pointer-events-none"></div>
   </div>
 
-  <!-- Modal de Início -->
-<!-- Start modal -->
-<div id="start-modal"
-     class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
-    <div class="bg-white rounded-lg p-6 text-center shadow-xl w-full max-w-md mx-auto">
-      <img src="logo 2.png" alt="Pirarucu Aventureiro" class="mx-auto mb-4 w-40 h-auto shadow" style="border-radius:0;">
-      <h2 class="text-2xl font-bold mb-2">🐟 Pirarucu Aventureiro</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-4">
-        <p class="font-bold text-green-600">🟢 Peixes Seguros:<br>Tambaqui, Pacu, Aruanã</p>
-        <p class="font-bold text-red-600">🔴 Contaminados:<br>Tucunaré, Surubim, Piranha</p>
+  <!-- Modal Game Over (mantido) -->
+  <div id="game-over-modal"
+       class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
+      <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+        <h2 class="text-2xl font-bold mb-2 text-red-600">Fim de Jogo</h2>
+        <p id="game-over-reason" class="mb-4">A contaminação por mercúrio atingiu um nível crítico.</p>
+        <p class="mb-2 text-sm">O mercúrio se acumula na cadeia alimentar e afeta a saúde humana.</p>
+        <div id="new-record-message" class="mb-4 p-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg hidden">
+          <p class="text-lg font-bold text-yellow-700">🎉 Novo Recorde Pessoal! 🎉</p>
+        </div>
+        <p class="mb-2">Jogador: <span id="final-player-name" class="font-bold">-</span></p>
+        <p class="mb-2">Sua pontuação final: <span id="final-score" class="font-bold text-blue-600">0</span></p>
+        <p class="mb-4">Nível alcançado: <span id="final-level" class="font-bold">1</span></p>
+        <button id="restart-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Jogar Novamente</button>
+        <button id="view-ranking-gameover-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
+        <p class="mt-4 text-xs text-gray-500">
+          Desenvolvido por <strong>Júlia Maretti Louvem</strong> e <strong>Yan Ribeiro de Paiva</strong>
+        </p>
       </div>
-      <p class="mb-3 text-sm">Colete peixes seguros e evite os contaminados para não acumular mercúrio!</p>
-      <p class="mb-6 text-sm">Arraste o dedo ou o mouse para mover o Pirarucu.</p>
-      <button id="start-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Começar a Jogar</button>
-      <p class="mt-4 text-xs text-gray-500">
-  Desenvolvido por <strong>Júlia Maretti Louvem</strong> e <strong>Yan Ribeiro de Paiva</strong>
-</p>
-    </div>
   </div>
 
-  <!-- Modal Game Over -->
- <!-- Game over -->
-<div id="game-over-modal"
-     class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
-    <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
-      <h2 class="text-2xl font-bold mb-2 text-red-600">Fim de Jogo</h2>
-      <p id="game-over-reason" class="mb-4">A contaminação por mercúrio atingiu um nível crítico.</p>
-      <p class="mb-2 text-sm">O mercúrio se acumula na cadeia alimentar e afeta a saúde humana.</p>
-      <div id="new-record-message" class="mb-4 p-3 bg-yellow-100 border-2 border-yellow-400 rounded-lg hidden">
-        <p class="text-lg font-bold text-yellow-700">🎉 Novo Recorde Pessoal! 🎉</p>
+  <!-- Modais Info e Level Up permanecem no HTML, mas não serão mais usados -->
+  <div id="info-modal"
+       class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
+      <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+        <h2 class="text-2xl font-bold mb-2">📚 Bioacumulação</h2>
+        <p class="mb-4">Peixes carnívoros acumulam mais mercúrio por comerem outros peixes contaminados.</p>
+        <p class="mb-4">Quanto maior o peixe na cadeia alimentar, maior a concentração de mercúrio.</p>
+        <button id="continue-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Entendi, continuar!</button>
       </div>
-      <p class="mb-2">Jogador: <span id="final-player-name" class="font-bold">-</span></p>
-      <p class="mb-2">Sua pontuação final: <span id="final-score" class="font-bold text-blue-600">0</span></p>
-      <p class="mb-4">Nível alcançado: <span id="final-level" class="font-bold">1</span></p>
-      <button id="restart-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Jogar Novamente</button>
-      <button id="view-ranking-gameover-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
-    <p class="mt-4 text-xs text-gray-500">
-  Desenvolvido por <strong>Júlia Maretti Louvem</strong> e <strong>Yan Ribeiro de Paiva</strong>
-</p>
-    </div>
   </div>
 
-  <!-- Modal Informativo -->
- <!-- Info -->
-<div id="info-modal"
-     class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
-    <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
-      <h2 class="text-2xl font-bold mb-2">📚 Bioacumulação</h2>
-      <p class="mb-4">Peixes carnívoros acumulam mais mercúrio por comerem outros peixes contaminados.</p>
-      <p class="mb-4">Quanto maior o peixe na cadeia alimentar, maior a concentração de mercúrio.</p>
-      <button id="continue-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Entendi, continuar!</button>
-    </div>
+  <div id="level-up-modal"
+       class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
+      <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+        <h2 class="text-2xl font-bold mb-2 text-green-600">🎉 Nível <span id="new-level">2</span>!</h2>
+        <p class="mb-4">Parabéns! Os peixes agora caem mais rápido!</p>
+        <button id="level-continue-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg w-full">Continuar</button>
+      </div>
   </div>
 
-  <!-- Modal Level Up -->
-  <!-- Level up -->
-<div id="level-up-modal"
-     class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
-    <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
-      <h2 class="text-2xl font-bold mb-2 text-green-600">🎉 Nível <span id="new-level">2</span>!</h2>
-      <p class="mb-4">Parabéns! Os peixes agora caem mais rápido!</p>
-      <button id="level-continue-button" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg w-full">Continuar</button>
-    </div>
-  </div>
-
-  <!-- Modal Ranking -->
- <!-- Ranking -->
-<div id="ranking-modal"
-     class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
-    <div class="bg-white rounded-lg p-6 shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto">
-      <h2 class="text-2xl font-bold mb-4 text-center">🏆 Ranking de Jogadores</h2>
-      <div id="ranking-list" class="space-y-2"></div>
-      <button id="close-ranking-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mt-4">Fechar</button>
-    </div>
+  <!-- Modal Ranking (mantido) -->
+  <div id="ranking-modal"
+       class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
+      <div class="bg-white rounded-lg p-6 shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-4 text-center">🏆 Ranking de Jogadores</h2>
+        <div id="ranking-list" class="space-y-2"></div>
+        <button id="close-ranking-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mt-4">Fechar</button>
+      </div>
   </div>
 
   <script>
@@ -491,14 +502,40 @@
       setTimeout(()=>{ factDisplayEl.style.opacity='0'; }, 5000);
     }
 
-    function showInfoModal(){
-      infoPopupShown = true; gameRunning = false;
-      infoModal.classList.remove('hidden'); setTimeout(()=>{ infoModal.style.opacity='1'; },10);
+    /* ---- NOVO: selo discreto no HUD ao lado do Nível ---- */
+    function showHudNote(text, color = 'green') {
+      const el = document.getElementById('hud-note');
+      // limpa cores antigas
+      el.classList.remove('bg-green-600','bg-blue-600','bg-yellow-600','bg-red-600','hud-note-show','hidden');
+      // define cor
+      const map = { green:'bg-green-600', blue:'bg-blue-600', yellow:'bg-yellow-600', red:'bg-red-600' };
+      el.classList.add(map[color] || 'bg-green-600');
+      // texto e animação
+      el.textContent = text;
+      el.classList.add('hud-note-show');
+
+      // pequeno destaque no número do nível
+      levelEl.classList.add('ring','ring-offset-1','ring-green-400','rounded-sm');
+      setTimeout(()=> levelEl.classList.remove('ring','ring-offset-1','ring-green-400','rounded-sm'), 1000);
+
+      // esconder após animação
+      setTimeout(()=> {
+        el.classList.add('hidden');
+        el.classList.remove('hud-note-show');
+      }, 3000);
     }
 
+    /* ---- ALTERADO: não usa mais modal nem pausa o jogo ---- */
+    function showInfoModal(){
+      infoPopupShown = true;
+      showHudNote('ⓘ Dica: carnívoros ↑ Hg', 'blue');
+    }
+
+    /* ---- ALTERADO: level up discreto no HUD, sem pausar ---- */
     function levelUp(){
-      level++; gameRunning=false; newLevelEl.textContent = level;
-      levelUpModal.classList.remove('hidden'); setTimeout(()=>{ levelUpModal.style.opacity='1'; },10);
+      level++;
+      showHudNote(`⬆ Nível ${level}! Peixes +rápidos`, 'green');
+      updateHUD();
     }
 
     function gameOver(){
@@ -509,7 +546,7 @@
       gameOverModal.classList.remove('hidden'); setTimeout(()=>{ gameOverModal.style.opacity='1'; },10);
     }
 
-    // ------------ Input: mouse/touch no container (não só no canvas) ------------
+    // ------------ Input: mouse/touch ------------
     function setTargetFromClientX(clientX){
       const rect = canvas.getBoundingClientRect();
       player.targetX = Math.max(0, Math.min(canvas.width, clientX - rect.left));
@@ -584,12 +621,13 @@
       },300);
     });
 
-    continueButton.addEventListener('click', () => {
+    // Esses dois abaixo permanecem, mas não serão chamados pois não abrimos mais os modais:
+    continueButton?.addEventListener('click', () => {
       infoModal.style.opacity='0';
       setTimeout(()=>{ infoModal.classList.add('hidden'); gameRunning=true; },300);
     });
 
-    levelContinueButton.addEventListener('click', () => {
+    levelContinueButton?.addEventListener('click', () => {
       levelUpModal.style.opacity='0';
       setTimeout(()=>{ levelUpModal.classList.add('hidden'); gameRunning=true; },300);
     });
