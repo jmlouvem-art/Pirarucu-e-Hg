@@ -17,7 +17,7 @@
   body{font-family:'Nunito',sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;}
   canvas{background-size:cover;background-position:center;display:block;}
 
-  /* Fundo adaptativo */
+  /* Fundo por orientação */
   @media(orientation:landscape){
     canvas,.modal-water{background-image:url('Fundo pc.png');}
   }
@@ -35,12 +35,12 @@
 
 <body class="bg-blue-900 flex flex-col items-center justify-center min-h-[100svh] overflow-hidden">
 
-<!-- Modal Nome -->
+<!-- Modal: Nome -->
 <div id="name-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120]">
   <div class="rounded-lg p-6 text-center shadow-xl max-w-sm w-full bg-cover bg-center modal-water">
     <div class="bg-white bg-opacity-80 p-4 shadow-md">
       <div class="flex justify-center mb-4"><img src="logo 2.png" class="w-[210px] h-auto shadow-lg"></div>
-      <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
+      <h2 class="text-2xl font-bold mb-2">🐟 Bem-vindo!</h2>
       <p class="mb-4">Digite seu nome para começar:</p>
       <input id="player-name-input" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20" placeholder="Seu nome">
       <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
@@ -51,6 +51,7 @@
 
 <!-- Container do jogo -->
 <div id="game-container" class="hidden relative bg-blue-800 shadow-2xl flex flex-col" style="width:100%;height:auto;">
+  <!-- HUD -->
   <div class="p-3 bg-blue-200/80 text-gray-800 flex justify-between items-center z-20">
     <div class="flex items-center gap-2">
       <img src="logo 2.png" class="w-8 h-8 object-contain">
@@ -66,31 +67,38 @@
     </div>
   </div>
 
+  <!-- Canvas -->
   <canvas id="gameCanvas" class="flex-1 w-full"></canvas>
 
+  <!-- Barra Hg -->
   <div class="absolute top-24 right-3 w-12 text-center z-10 pointer-events-none">
-    <div class="text-white text-sm font-bold mb-1">Hg</div>
+    <div class="text-white text-sm font-bold mb-1" title="Mercúrio">Hg</div>
     <div class="relative h-64 w-6 bg-white bg-opacity-30 rounded-full overflow-hidden mx-auto border-2 border-white/50">
       <div id="mercury-bar" class="absolute bottom-0 w-full bg-red-600 transition-all duration-300" style="height:0%;"></div>
     </div>
     <div class="text-white text-xs mt-1"><span id="mercury-percent">0</span>%</div>
   </div>
 
+  <!-- Mensagens rápidas -->
   <div id="game-message" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl font-bold z-20 opacity-0 pointer-events-none text-center drop-shadow-lg"></div>
 </div>
 
-<!-- Modal Início -->
+<!-- Modal: Início (com explicação e botão começar) -->
 <div id="start-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
   <div class="bg-white rounded-lg p-6 text-center shadow-xl w-full max-w-md mx-auto">
-    <img src="logo 2.png" class="mx-auto mb-4 w-40 h-auto shadow">
+    <img src="logo 2.png" class="mx-auto mb-4 w-40 h-auto shadow" style="border-radius:0;">
     <h2 class="text-2xl font-bold mb-2">🐟 Pirarucu Aventureiro</h2>
-    <p class="mb-3 text-sm">Colete peixes seguros e evite os contaminados!</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-4">
+      <p class="font-bold text-green-600">🟢 Peixes Seguros:<br>Tambaqui, Pacu, Aruanã</p>
+      <p class="font-bold text-red-600">🔴 Contaminados:<br>Tucunaré, Surubim, Piranha</p>
+    </div>
+    <p class="mb-3 text-sm">Colete os seguros para ganhar pontos. Castanha reduz Hg. Evite os contaminados!</p>
     <p class="mb-6 text-sm">Arraste o dedo ou o mouse para mover o Pirarucu.</p>
     <button id="start-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Começar</button>
   </div>
 </div>
 
-<!-- Game Over -->
+<!-- Modal: Game Over -->
 <div id="game-over-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
   <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
     <h2 class="text-2xl font-bold mb-2 text-red-600">Fim de Jogo</h2>
@@ -102,7 +110,7 @@
   </div>
 </div>
 
-<!-- Ranking -->
+<!-- Modal: Ranking -->
 <div id="ranking-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
   <div class="bg-white rounded-lg p-6 shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto">
     <h2 class="text-2xl font-bold mb-4 text-center">🏆 Ranking</h2>
@@ -112,6 +120,7 @@
 </div>
 
 <script>
+/* ---------- DOM ---------- */
 const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
 const scoreEl=document.getElementById('score'),highScoreEl=document.getElementById('high-score'),levelEl=document.getElementById('level');
 const mercuryBarEl=document.getElementById('mercury-bar'),mercuryPercentEl=document.getElementById('mercury-percent');
@@ -122,35 +131,4 @@ const startButton=document.getElementById('start-button'),restartButton=document
 const finalScoreEl=document.getElementById('final-score'),finalLevelEl=document.getElementById('final-level'),finalPlayerNameEl=document.getElementById('final-player-name'),rankingListEl=document.getElementById('ranking-list');
 const playerNameDisplayEl=document.getElementById('player-name-display');
 
-let score=0,highScore=0,level=1,mercuryLevel=0,gameRunning=false,playerName='',player,fish=[],bubbles=[];
-
-/* fundo inicia visível */
-document.addEventListener('DOMContentLoaded',()=>{
-  nameModal.classList.remove('hidden');
-  nameModal.style.opacity='1';
-});
-
-/* Enter envia nome */
-playerNameInput.addEventListener('keydown',(e)=>{
-  if(e.key==='Enter') nameSubmitButton.click();
-});
-
-/* Clique confirma nome */
-nameSubmitButton.onclick=()=>{
-  const n=(playerNameInput.value||'').trim();
-  if(!n){alert('Digite seu nome!');playerNameInput.focus();return;}
-  playerName=n;
-  playerNameDisplayEl.textContent=playerName;
-  nameModal.style.opacity='0';
-  setTimeout(()=>{
-    nameModal.classList.add('hidden');
-    gameContainer.classList.remove('hidden');
-    startModal.classList.remove('hidden');
-    setTimeout(()=>{startModal.style.opacity='1';},10);
-  },300);
-};
-
-/* Resto do jogo continua igual ao anterior (movimento, lógica, Hg, ranking, etc) */
-</script>
-</body>
-</html>
+/* ---------- Estado ----------*
