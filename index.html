@@ -17,7 +17,7 @@
   body{font-family:'Nunito',sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;}
   canvas{background-size:cover;background-position:center;display:block;}
 
-  /* Fundo muda por orientação */
+  /* Fundo por orientação */
   @media(orientation:landscape){
     canvas,.modal-water{background-image:url('Fundo pc.png');}
   }
@@ -65,7 +65,11 @@
       <div class="text-xs">Recorde: <span id="high-score">0</span></div>
     </div>
   </div>
+
+  <!-- Canvas -->
   <canvas id="gameCanvas" class="flex-1 w-full"></canvas>
+
+  <!-- Barra Hg -->
   <div class="absolute top-24 right-3 w-12 text-center z-10 pointer-events-none">
     <div class="text-white text-sm font-bold mb-1">Hg</div>
     <div class="relative h-64 w-6 bg-white bg-opacity-30 rounded-full overflow-hidden mx-auto border-2 border-white/50">
@@ -73,11 +77,12 @@
     </div>
     <div class="text-white text-xs mt-1"><span id="mercury-percent">0</span>%</div>
   </div>
+
+  <!-- Mensagens (mantidas para +pontos / +Hg) -->
   <div id="game-message" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl font-bold z-20 opacity-0 pointer-events-none text-center drop-shadow-lg"></div>
-  <!-- fact-display removido das atualizações -->
 </div>
 
-<!-- Modal Start -->
+<!-- Start -->
 <div id="start-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
   <div class="bg-white rounded-lg p-6 text-center shadow-xl w-full max-w-md mx-auto">
     <img src="logo 2.png" class="mx-auto mb-4 w-40 h-auto shadow">
@@ -110,75 +115,36 @@
 </div>
 
 <script>
-/* ---------- VARIÁVEIS ---------- */
+/* ---------- DOM ---------- */
 const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
 const scoreEl=document.getElementById('score'),highScoreEl=document.getElementById('high-score'),levelEl=document.getElementById('level');
 const mercuryBarEl=document.getElementById('mercury-bar'),mercuryPercentEl=document.getElementById('mercury-percent');
-const gameContainer=document.getElementById('game-container');
+const gameContainer=document.getElementById('game-container'),gameMessageEl=document.getElementById('game-message');
 const nameModal=document.getElementById('name-modal'),startModal=document.getElementById('start-modal'),gameOverModal=document.getElementById('game-over-modal'),rankingModal=document.getElementById('ranking-modal');
-const playerNameInput=document.getElementById('player-name-input'),nameSubmitButton=document.getElementById('name-submit-button');
-const startButton=document.getElementById('start-button'),restartButton=document.getElementById('restart-button'),viewRankingButton=document.getElementById('view-ranking-button'),viewRankingGameoverButton=document.getElementById('view-ranking-gameover-button'),closeRankingButton=document.getElementById('close-ranking-button');
+const playerNameInput=document.getElementById('player-name-input'),nameSubmitButton=document.getElementById('name-submit-button'),viewRankingButton=document.getElementById('view-ranking-button');
+const startButton=document.getElementById('start-button'),restartButton=document.getElementById('restart-button'),viewRankingGameoverButton=document.getElementById('view-ranking-gameover-button'),closeRankingButton=document.getElementById('close-ranking-button');
 const finalScoreEl=document.getElementById('final-score'),finalLevelEl=document.getElementById('final-level'),finalPlayerNameEl=document.getElementById('final-player-name'),rankingListEl=document.getElementById('ranking-list');
+const playerNameDisplayEl=document.getElementById('player-name-display');
 
-let score=0,highScore=0,level=1,mercuryLevel=0,gameRunning=false,playerName='',player,fish,bubbles;
+/* ---------- Estado ---------- */
+let score=0,highScore=0,level=1,mercuryLevel=0,gameRunning=false,playerName='',player,fish=[],bubbles=[];
 
-/* ---------- AJUSTE TAMANHO ---------- */
-function resizeCanvas(){
-  const MAX_W=1100,MAX_H=1100,VIEW_W=Math.min(window.innerWidth*.98,MAX_W),VIEW_H=Math.min(window.innerHeight*.85,MAX_H),AR=16/9;
-  let w=VIEW_W,h=w/AR;if(h>VIEW_H){h=VIEW_H;w=h*AR;}
-  gameContainer.style.width=w+'px';gameContainer.style.height=h+'px';
-  const hudH=40;const cH=Math.max(100,h-hudH),cW=w;
-  const dpr=Math.max(1,Math.floor(window.devicePixelRatio||1));
-  canvas.style.width=cW+'px';canvas.style.height=cH+'px';canvas.width=cW*dpr;canvas.height=cH*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
-}
-window.addEventListener('resize',resizeCanvas);window.addEventListener('orientationchange',()=>setTimeout(resizeCanvas,150));
+/* ---------- Imagens ---------- */
+const playerImg = new Image();
+playerImg.src = 'pirarucu m.png';
 
-/* ---------- JOGO ---------- */
-function init(){
-  resizeCanvas();score=0;level=1;mercuryLevel=0;
-  player={x:canvas.width/2,y:canvas.height-120,width:160,height:160,targetX:canvas.width/2};
-  fish=[];bubbles=[];for(let i=0;i<15;i++)bubbles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,radius:Math.random()*10+5,speed:Math.random()*.5+.2});
-  updateHUD();
-}
-function updateHUD(){
-  scoreEl.textContent=score;highScoreEl.textContent=highScore;levelEl.textContent=level;
-  mercuryBarEl.style.height=mercuryLevel+'%';mercuryPercentEl.textContent=Math.round(mercuryLevel);
-}
-const fishData={safe:[{name:'Tambaqui',points:10,mercury:5},{name:'Pacu',points:10,mercury:5},{name:'Aruanã',points:15,mercury:8},{name:'Castanha',points:20,mercury:-10}],
-contaminated:[{name:'Tucunaré',points:-5,mercury:25},{name:'Surubim',points:-5,mercury:30},{name:'Piranha',points:-5,mercury:20}]};
-function createFish(){let t;if(Math.random()<.05)t=fishData.safe[3];else{const ok=Math.random()<.6;const arr=ok?fishData.safe:fishData.contaminated;t=arr[Math.floor(Math.random()*arr.length)];}
-const w=t.name==='Castanha'?60:120;fish.push({x:Math.random()*(canvas.width-w)+w/2,y:-w,width:w,height:w,speed:.8+level*.2,data:t});}
-function checkCollision(p,f){const dx=p.x-f.x,dy=p.y-f.y;return Math.sqrt(dx*dx+dy*dy)<(p.width/3+f.width/3);}
-function update(){
-  if(!gameRunning)return;player.x+=(player.targetX-player.x)*.1;
-  bubbles.forEach(b=>{b.y-=b.speed;if(b.y<-20)b.y=canvas.height+20;});
-  for(let i=fish.length-1;i>=0;i--){const f=fish[i];f.y+=f.speed;
-    if(checkCollision(player,f)){score+=f.data.points;mercuryLevel+=f.data.mercury;mercuryLevel=Math.max(0,Math.min(100,mercuryLevel));updateHUD();fish.splice(i,1);
-      if(mercuryLevel>=100){gameOver();return;}
-      if(score>=level*150){level++;}}else if(f.y>canvas.height+50)fish.splice(i,1);}
-  if(Math.random()<0.01+level*0.005)createFish();
-}
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  bubbles.forEach(b=>{ctx.fillStyle='rgba(255,255,255,0.2)';ctx.beginPath();ctx.arc(b.x,b.y,b.radius,0,Math.PI*2);ctx.fill();});
-  fish.forEach(f=>{ctx.fillStyle=f.data.mercury>15?'rgba(255,0,0,0.4)':f.data.mercury<0?'rgba(255,215,0,0.4)':'rgba(0,255,100,0.4)';
-    ctx.beginPath();ctx.arc(f.x,f.y,f.width/2.5,0,Math.PI*2);ctx.fill();});
-  ctx.fillStyle='#8B7355';ctx.fillRect(player.x-player.width/2,player.y-player.height/2,player.width,player.height);
-}
-function gameLoop(){update();draw();requestAnimationFrame(gameLoop);}
-function gameOver(){gameRunning=false;finalScoreEl.textContent=score;finalLevelEl.textContent=level;finalPlayerNameEl.textContent=playerName;
-  gameOverModal.classList.remove('hidden');setTimeout(()=>gameOverModal.style.opacity='1',10);}
-
-/* ---------- INPUT ---------- */
-function setTargetFromClientX(x){const r=canvas.getBoundingClientRect();player.targetX=Math.max(0,Math.min(canvas.width,x-r.left));}
-gameContainer.addEventListener('mousemove',e=>setTargetFromClientX(e.clientX));
-gameContainer.addEventListener('touchmove',e=>{const t=e.touches[0];if(t)setTargetFromClientX(t.clientX);},{passive:true});
-
-/* ---------- EVENTOS ---------- */
-nameSubmitButton.onclick=()=>{const n=playerNameInput.value.trim();if(!n){alert('Digite seu nome!');return;}
-playerName=n;nameModal.style.opacity='0';setTimeout(()=>{nameModal.classList.add('hidden');gameContainer.classList.remove('hidden');startModal.classList.remove('hidden');setTimeout(()=>startModal.style.opacity='1',10);},300);};
-startButton.onclick=()=>{startModal.style.opacity='0';setTimeout(()=>{startModal.classList.add('hidden');init();gameRunning=true;gameLoop();},300);};
-restartButton.onclick=()=>{gameOverModal.style.opacity='0';setTimeout(()=>{gameOverModal.classList.add('hidden');init();gameRunning=true;gameLoop();},300);};
-</script>
-</body>
-</html>
+const fishImages = {
+  'Tambaqui': new Image(),
+  'Pacu': new Image(),
+  'Aruanã': new Image(),
+  'Tucunaré': new Image(),
+  'Surubim': new Image(),
+  'Piranha': new Image(),
+  'Castanha': new Image()
+};
+fishImages['Tambaqui'].src='Tambaqui.png';
+fishImages['Pacu'].src='Pacu.png';
+fishImages['Aruanã'].src='Aruana.png';   // arquivo sem til
+fishImages['Tucunaré'].src='Tucunare.png'; // arquivo sem acento
+fishImages['Surubim'].src='Surubim.png';
+fishImages['Piranha'].src='Piranha.pn
