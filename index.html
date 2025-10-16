@@ -12,47 +12,55 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-html,body{overscroll-behavior:none;}
-*{-webkit-tap-highlight-color:transparent;}
-body{font-family:'Nunito',sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;}
-canvas{background-size:cover;background-position:center;display:block;}
-/* fundo alterna conforme orientação */
-@media(orientation:landscape){
-  canvas,.modal-water{background-image:url('Fundo pc.png');}
-}
-@media(orientation:portrait){
-  canvas,.modal-water{background-image:url('Fundo do Lago.png');}
-}
-.modal{transition:opacity .3s ease-in-out;}
-@keyframes particleFade{0%{opacity:1;transform:scale(1);}100%{opacity:0;transform:scale(.5) translateY(-50px);}}
-.particle{position:absolute;pointer-events:none;animation:particleFade 1s ease-out forwards;}
-.ranking-entry{transition:all .3s ease;}
-.ranking-entry:hover{transform:scale(1.02);background-color:rgba(59,130,246,.1);}
-@keyframes hudFade{0%{opacity:0;transform:translateY(-2px);}10%{opacity:1;transform:translateY(0);}90%{opacity:1;}100%{opacity:0;transform:translateY(-2px);}}
-.hud-note-show{animation:hudFade 3s ease-in-out forwards;}
+  html,body{overscroll-behavior:none;}
+  *{-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Nunito',sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;}
+
+  /* canvas sem imagem fixa; quem decide é a orientation */
+  canvas{background-size:cover;background-position:center;display:block;}
+
+  /* Fundo por orientação */
+  @media (orientation:landscape){ /* PC / tablet deitado */
+    canvas,.modal-water{background-image:url('Fundo pc.png');}
+  }
+  @media (orientation:portrait){  /* celular em pé */
+    canvas,.modal-water{background-image:url('Fundo do Lago.png');}
+  }
+
+  .modal{transition:opacity .3s ease-in-out;}
+  @keyframes particleFade{0%{opacity:1;transform:scale(1);}100%{opacity:0;transform:scale(.5) translateY(-50px);}}
+  .particle{position:absolute;pointer-events:none;animation:particleFade 1s ease-out forwards;}
+  .ranking-entry{transition:all .3s ease;}
+  .ranking-entry:hover{transform:scale(1.02);background-color:rgba(59,130,246,.1);}
+
+  /* selo discreto no HUD */
+  @keyframes hudFade{
+    0%{opacity:0;transform:translateY(-2px);}
+    10%{opacity:1;transform:translateY(0);}
+    90%{opacity:1;}
+    100%{opacity:0;transform:translateY(-2px);}
+  }
+  .hud-note-show{animation:hudFade 3s ease-in-out forwards;}
 </style>
 </head>
 
 <body class="bg-blue-900 flex flex-col items-center justify-center min-h-[100svh] overflow-hidden">
 
-<!-- modal nome -->
+<!-- Modal: Nome -->
 <div id="name-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120]">
   <div class="rounded-lg p-6 text-center shadow-xl max-w-sm w-full bg-cover bg-center modal-water">
     <div class="bg-white bg-opacity-80 p-4 shadow-md">
       <div class="flex justify-center mb-4"><img src="logo 2.png" class="w-[210px] h-auto shadow-lg"></div>
       <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
       <p class="mb-4">Digite seu nome para começar:</p>
-      <input type="text" id="player-name-input" placeholder="Seu nome"
-        class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20">
-      <button id="name-submit-button"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
-      <button id="view-ranking-button"
-        class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
+      <input id="player-name-input" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20" placeholder="Seu nome">
+      <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
+      <button id="view-ranking-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
     </div>
   </div>
 </div>
 
-<!-- container jogo -->
+<!-- Jogo -->
 <div id="game-container" class="hidden relative bg-blue-800 shadow-2xl flex flex-col" style="width:100%;height:auto;">
   <!-- HUD -->
   <div class="p-3 bg-blue-200/80 text-gray-800 flex justify-between items-center z-20">
@@ -73,22 +81,24 @@ canvas{background-size:cover;background-position:center;display:block;}
     </div>
   </div>
 
+  <!-- Canvas -->
   <canvas id="gameCanvas" class="flex-1 w-full"></canvas>
 
-  <!-- barra Hg -->
+  <!-- Barra Hg -->
   <div class="absolute top-24 right-3 w-12 text-center z-10 pointer-events-none">
-    <div class="text-white text-sm font-bold mb-1">Hg</div>
+    <div class="text-white text-sm font-bold mb-1" title="Mercúrio">Hg</div>
     <div class="relative h-64 w-6 bg-white bg-opacity-30 rounded-full overflow-hidden mx-auto border-2 border-white/50">
       <div id="mercury-bar" class="absolute bottom-0 w-full bg-red-600 transition-all duration-300" style="height:0%;"></div>
     </div>
     <div class="text-white text-xs mt-1"><span id="mercury-percent">0</span>%</div>
   </div>
 
+  <!-- Mensagens/Fact -->
   <div id="game-message" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl font-bold z-20 opacity-0 pointer-events-none text-center drop-shadow-lg"></div>
   <div id="fact-display" class="absolute bottom-20 left-1/2 -translate-x-1/2 bg-black bg-opacity-70 text-white text-sm p-3 rounded-lg max-w-xs text-center z-10 opacity-0 pointer-events-none"></div>
 </div>
 
-<!-- start modal -->
+<!-- Modal: Start -->
 <div id="start-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
   <div class="bg-white rounded-lg p-6 text-center shadow-xl w-full max-w-md mx-auto">
     <img src="logo 2.png" class="mx-auto mb-4 w-40 h-auto shadow">
@@ -98,12 +108,13 @@ canvas{background-size:cover;background-position:center;display:block;}
       <p class="font-bold text-red-600">🔴 Contaminados:<br>Tucunaré, Surubim, Piranha</p>
     </div>
     <p class="mb-3 text-sm">Colete peixes seguros e evite os contaminados!</p>
+    <p class="mb-6 text-sm">Arraste o dedo ou o mouse para mover o Pirarucu.</p>
     <button id="start-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Começar</button>
     <p class="mt-4 text-xs text-gray-500">Desenvolvido por <strong>Júlia Maretti Louvem</strong> e <strong>Yan Ribeiro de Paiva</strong></p>
   </div>
 </div>
 
-<!-- game over modal -->
+<!-- Modal: Game Over -->
 <div id="game-over-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
   <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
     <h2 class="text-2xl font-bold mb-2 text-red-600">Fim de Jogo</h2>
@@ -112,7 +123,7 @@ canvas{background-size:cover;background-position:center;display:block;}
       <p class="text-lg font-bold text-yellow-700">🎉 Novo Recorde!</p>
     </div>
     <p>Jogador: <span id="final-player-name" class="font-bold">-</span></p>
-    <p>Sua pontuação: <span id="final-score" class="font-bold text-blue-600">0</span></p>
+    <p>Pontuação: <span id="final-score" class="font-bold text-blue-600">0</span></p>
     <p>Nível: <span id="final-level" class="font-bold">1</span></p>
     <button id="restart-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Jogar Novamente</button>
     <button id="view-ranking-gameover-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
@@ -120,7 +131,7 @@ canvas{background-size:cover;background-position:center;display:block;}
   </div>
 </div>
 
-<!-- ranking modal -->
+<!-- Modal: Ranking -->
 <div id="ranking-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
   <div class="bg-white rounded-lg p-6 shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto">
     <h2 class="text-2xl font-bold mb-4 text-center">🏆 Ranking</h2>
@@ -130,56 +141,368 @@ canvas{background-size:cover;background-position:center;display:block;}
 </div>
 
 <script>
-const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
-const scoreEl=document.getElementById('score'),highScoreEl=document.getElementById('high-score'),levelEl=document.getElementById('level');
-const mercuryBarEl=document.getElementById('mercury-bar'),mercuryPercentEl=document.getElementById('mercury-percent');
-const gameContainer=document.getElementById('game-container'),gameMessageEl=document.getElementById('game-message'),factDisplayEl=document.getElementById('fact-display');
-const playerNameDisplayEl=document.getElementById('player-name-display');
-const nameModal=document.getElementById('name-modal'),startModal=document.getElementById('start-modal'),gameOverModal=document.getElementById('game-over-modal'),rankingModal=document.getElementById('ranking-modal');
-const playerNameInput=document.getElementById('player-name-input'),nameSubmitButton=document.getElementById('name-submit-button'),viewRankingButton=document.getElementById('view-ranking-button');
-const startButton=document.getElementById('start-button'),restartButton=document.getElementById('restart-button'),viewRankingGameoverButton=document.getElementById('view-ranking-gameover-button'),closeRankingButton=document.getElementById('close-ranking-button');
-const finalScoreEl=document.getElementById('final-score'),finalLevelEl=document.getElementById('final-level'),finalPlayerNameEl=document.getElementById('final-player-name'),newRecordMessageEl=document.getElementById('new-record-message'),rankingListEl=document.getElementById('ranking-list');
+/* ---------- DOM ---------- */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const highScoreEl = document.getElementById('high-score');
+const levelEl = document.getElementById('level');
+const mercuryBarEl = document.getElementById('mercury-bar');
+const mercuryPercentEl = document.getElementById('mercury-percent');
+const gameContainer = document.getElementById('game-container');
+const gameMessageEl = document.getElementById('game-message');
+const factDisplayEl = document.getElementById('fact-display');
+const playerNameDisplayEl = document.getElementById('player-name-display');
 
-let score=0,highScore=0,level=1,mercuryLevel=0,gameRunning=false,infoPopupShown=false,playerName='',player,fish,bubbles;
+const nameModal = document.getElementById('name-modal');
+const startModal = document.getElementById('start-modal');
+const gameOverModal = document.getElementById('game-over-modal');
+const rankingModal = document.getElementById('ranking-modal');
 
-function resizeCanvas(){
- const MAX_W=1100,MAX_H=1100,VIEW_W=Math.min(window.innerWidth*.98,MAX_W),VIEW_H=Math.min(window.innerHeight*.85,MAX_H),ASPECT=16/9;
- let w=VIEW_W,h=w/ASPECT;if(h>VIEW_H){h=VIEW_H;w=h*ASPECT;}
- gameContainer.style.width=w+'px';gameContainer.style.height=h+'px';
- const hud=gameContainer.querySelector('.p-3.bg-blue-200\\/80');const hudH=hud?hud.getBoundingClientRect().height:0;
- const cH=Math.max(100,h-hudH),cW=w,dpr=Math.max(1,Math.floor(window.devicePixelRatio||1));
- canvas.style.width=cW+'px';canvas.style.height=cH+'px';canvas.width=cW*dpr;canvas.height=cH*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+const playerNameInput = document.getElementById('player-name-input');
+const nameSubmitButton = document.getElementById('name-submit-button');
+const viewRankingButton = document.getElementById('view-ranking-button');
+const startButton = document.getElementById('start-button');
+const restartButton = document.getElementById('restart-button');
+const viewRankingGameoverButton = document.getElementById('view-ranking-gameover-button');
+const closeRankingButton = document.getElementById('close-ranking-button');
+
+const finalScoreEl = document.getElementById('final-score');
+const finalLevelEl = document.getElementById('final-level');
+const finalPlayerNameEl = document.getElementById('final-player-name');
+const newRecordMessageEl = document.getElementById('new-record-message');
+const rankingListEl = document.getElementById('ranking-list');
+
+/* ---------- Estado ---------- */
+let score=0, highScore=0, level=1, mercuryLevel=0;
+let gameRunning=false, infoPopupShown=false, playerName='';
+let player, fish, bubbles;
+
+/* ---------- Imagens ---------- */
+const playerImg = new Image();
+playerImg.src = 'pirarucu m.png';
+
+const fishImages = {
+  'Tambaqui': new Image(),
+  'Pacu': new Image(),
+  'Aruanã': new Image(),
+  'Tucunaré': new Image(),
+  'Surubim': new Image(),
+  'Piranha': new Image(),
+  'Castanha': new Image()
+};
+fishImages['Tambaqui'].src='Tambaqui.png';
+fishImages['Pacu'].src='Pacu.png';
+fishImages['Aruanã'].src='Aruana.png';
+fishImages['Tucunaré'].src='Tucunare.png';
+fishImages['Surubim'].src='Surubim.png';
+fishImages['Piranha'].src='Piranha.png';
+fishImages['Castanha'].src='Castanha.png';
+
+/* ---------- Dados ---------- */
+const fishData = {
+  safe: [
+    { name:'Tambaqui', points:10, mercury:5,  color:'#FFD700' },
+    { name:'Pacu',     points:10, mercury:5,  color:'#FFA500' },
+    { name:'Aruanã',   points:15, mercury:8,  color:'#FFFF00' },
+    { name:'Castanha', points:20, mercury:-10, color:'#8B4513' }
+  ],
+  contaminated: [
+    { name:'Tucunaré', points:-5, mercury:25, color:'#8B0000' },
+    { name:'Surubim',  points:-5, mercury:30, color:'#A52A2A' },
+    { name:'Piranha',  points:-5, mercury:20, color:'#DC143C' }
+  ]
+};
+
+const educationalFacts = [
+  "Peixes carnívoros acumulam 6,5x mais mercúrio que herbívoros.",
+  "21,3% dos peixes comercializados na Amazônia têm níveis perigosos de mercúrio.",
+  "O mercúrio é usado no garimpo para separar o ouro.",
+  "A contaminação por mercúrio afeta povos indígenas e ribeirinhos.",
+  "O mercúrio pode causar danos neurológicos permanentes.",
+  "Gestantes e crianças são mais vulneráveis.",
+  "O mercúrio pode permanecer no ambiente por décadas.",
+  "≈200 toneladas/ano de mercúrio chegam aos rios da Amazônia."
+];
+let lastFactTime = 0;
+const factInterval = 15000;
+
+/* ---------- Ranking ---------- */
+function getRanking(){ const r=localStorage.getItem('pirarucu_ranking'); return r?JSON.parse(r):[]; }
+function saveRanking(r){ localStorage.setItem('pirarucu_ranking', JSON.stringify(r)); }
+function addToRanking(name,score,level){
+  const ranking=getRanking(); ranking.push({name,score,level,date:Date.now()});
+  ranking.sort((a,b)=>b.score-a.score); saveRanking(ranking.slice(0,10));
+}
+function displayRanking(){
+  const ranking=getRanking(); rankingListEl.innerHTML='';
+  if(!ranking.length){ rankingListEl.innerHTML='<p class="text-center text-gray-500">Nenhum registro ainda. Seja o primeiro!</p>'; return; }
+  ranking.forEach((e,i)=>{
+    const div=document.createElement('div');
+    div.className='ranking-entry p-3 rounded-lg border-2 border-gray-200 flex justify-between items-center';
+    if(i===0) div.classList.add('border-yellow-400','bg-yellow-50');
+    else if(i===1) div.classList.add('border-gray-400','bg-gray-50');
+    else if(i===2) div.classList.add('border-orange-400','bg-orange-50');
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}º`;
+    const date=new Date(e.date).toLocaleDateString('pt-BR');
+    div.innerHTML=`<div class="flex items-center gap-2">
+        <span class="text-xl font-bold">${medal}</span>
+        <div><div class="font-bold">${e.name}</div><div class="text-xs text-gray-500">${date}</div></div>
+      </div>
+      <div class="text-right"><div class="font-bold text-blue-600">${e.score} pts</div><div class="text-xs text-gray-500">Nível ${e.level}</div></div>`;
+    rankingListEl.appendChild(div);
+  });
+}
+function getPlayerHighScore(name){
+  const ranking=getRanking(); const mine=ranking.filter(e=>e.name===name);
+  return mine.length?Math.max(...mine.map(e=>e.score)):0;
 }
 
-let _resizeRAF=null;function onResize(){if(_resizeRAF)cancelAnimationFrame(_resizeRAF);_resizeRAF=requestAnimationFrame(()=>resizeCanvas());}
-window.addEventListener('resize',onResize);window.addEventListener('orientationchange',()=>setTimeout(onResize,150));
+/* ---------- Tamanho / Retina ---------- */
+function resizeCanvas(){
+  const MAX_W=1100, MAX_H=1100;
+  const VIEW_W=Math.min(window.innerWidth*0.98, MAX_W);
+  const VIEW_H=Math.min(window.innerHeight*0.85, MAX_H);
+  const AR=16/9;
+  let w=VIEW_W, h=w/AR;
+  if(h>VIEW_H){ h=VIEW_H; w=h*AR; }
 
-function showHudNote(t,c='green'){const e=document.getElementById('hud-note');
-e.classList.remove('bg-green-600','bg-blue-600','bg-yellow-600','bg-red-600','hud-note-show','hidden');
-const map={green:'bg-green-600',blue:'bg-blue-600',yellow:'bg-yellow-600',red:'bg-red-600'};e.classList.add(map[c]||'bg-green-600');
-e.textContent=t;e.classList.add('hud-note-show');levelEl.classList.add('ring','ring-offset-1','ring-green-400','rounded-sm');
-setTimeout(()=>levelEl.classList.remove('ring','ring-offset-1','ring-green-400','rounded-sm'),1e3);
-setTimeout(()=>{e.classList.add('hidden');e.classList.remove('hud-note-show');},3e3);}
+  gameContainer.style.width = Math.floor(w)+'px';
+  gameContainer.style.height = Math.floor(h)+'px';
 
-function showInfoModal(){infoPopupShown=true;showHudNote('ⓘ Dica: carnívoros ↑ Hg','blue');}
-function levelUp(){level++;showHudNote('⬆ Nível '+level+'! Peixes +rápidos','green');updateHUD();}
-function updateHUD(){scoreEl.textContent=score;highScoreEl.textContent=highScore;levelEl.textContent=level;mercuryBarEl.style.height=mercuryLevel+'%';mercuryPercentEl.textContent=Math.round(mercuryLevel);}
-function gameOver(){gameRunning=false;finalScoreEl.textContent=score;finalLevelEl.textContent=level;finalPlayerNameEl.textContent=playerName;
-if(score>highScore)newRecordMessageEl.classList.remove('hidden');else newRecordMessageEl.classList.add('hidden');
-addToRanking(playerName,score,level);gameOverModal.classList.remove('hidden');setTimeout(()=>gameOverModal.style.opacity='1',10);}
-function showMessage(t,c){gameMessageEl.textContent=t;gameMessageEl.style.color=c;gameMessageEl.style.opacity='1';setTimeout(()=>gameMessageEl.style.opacity='0',1e3);}
-function createParticles(x,y,color){for(let i=0;i<10;i++){const p=document.createElement('div');p.className='particle';p.style.left=x+'px';p.style.top=y+'px';p.style.width='5px';p.style.height='5px';p.style.backgroundColor=color;p.style.borderRadius='50%';gameContainer.appendChild(p);setTimeout(()=>p.remove(),1e3);}}
+  const hud = gameContainer.querySelector('.p-3.bg-blue-200\\/80');
+  const hudH = hud ? hud.getBoundingClientRect().height : 0;
+  const cH = Math.max(100, h - hudH), cW = w;
 
-const fishData={safe:[{name:'Tambaqui',points:10,mercury:5,color:'#FFD700'},{name:'Pacu',points:10,mercury:5,color:'#FFA500'},{name:'Aruanã',points:15,mercury:8,color:'#FFFF00'},{name:'Castanha',points:20,mercury:-10,color:'#8B4513'}],
-contaminated:[{name:'Tucunaré',points:-5,mercury:25,color:'#8B0000'},{name:'Surubim',points:-5,mercury:30,color:'#A52A2A'},{name:'Piranha',points:-5,mercury:20,color:'#DC143C'}]};
-const educationalFacts=["Peixes carnívoros acumulam 6,5x mais mercúrio.","21,3% dos peixes têm níveis perigosos.","O mercúrio é usado no garimpo.","Afeta povos indígenas e ribeirinhos.","Causa danos neurológicos.","Gestantes e crianças são vulneráveis.","Permanece décadas no ambiente.","≈200 t/ano chegam à Amazônia."];
-let lastFactTime=0,factInterval=15000;
+  const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+  canvas.style.width = Math.floor(cW)+'px';
+  canvas.style.height = Math.floor(cH)+'px';
+  canvas.width = Math.floor(cW*dpr);
+  canvas.height = Math.floor(cH*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+let _resizeRAF=null;
+function onResize(){ if(_resizeRAF) cancelAnimationFrame(_resizeRAF); _resizeRAF=requestAnimationFrame(resizeCanvas); }
+window.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', ()=>setTimeout(onResize,150));
 
-function init(){resizeCanvas();score=0;level=1;mercuryLevel=0;infoPopupShown=false;lastFactTime=Date.now();
-player={x:canvas.width/2,y:canvas.height/2,width:160,height:160,targetX:canvas.width/2};highScore=getPlayerHighScore(playerName);
-updateHUD();fish=[];bubbles=[];for(let i=0;i<15;i++)bubbles.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,radius:Math.random()*10+5,speed:Math.random()*.5+.2});}
+/* ---------- Desenho ---------- */
+function drawBubble(b){
+  ctx.fillStyle='rgba(255,255,255,0.2)';
+  ctx.strokeStyle='rgba(255,255,255,0.4)';
+  ctx.lineWidth=1;
+  ctx.beginPath(); ctx.arc(b.x,b.y,b.radius,0,Math.PI*2); ctx.fill(); ctx.stroke();
+}
+function drawPlayer(p){
+  if (playerImg.complete && playerImg.naturalWidth>0){
+    ctx.drawImage(playerImg, p.x-p.width/2, p.y-p.height/2, p.width, p.height);
+  } else {
+    ctx.fillStyle='#8B7355';
+    ctx.fillRect(p.x-p.width/2,p.y-p.height/2,p.width,p.height);
+  }
+}
+function drawFish(f){
+  ctx.save(); ctx.translate(f.x,f.y);
+  if(f.data.mercury>15){ctx.shadowColor='rgba(255,0,0,.6)';ctx.shadowBlur=8;ctx.fillStyle='rgba(255,0,0,.12)';}
+  else if(f.data.mercury<0){ctx.shadowColor='rgba(255,215,0,.6)';ctx.shadowBlur=8;ctx.fillStyle='rgba(255,215,0,.15)';}
+  else{ctx.shadowColor='rgba(0,255,100,.6)';ctx.shadowBlur=8;ctx.fillStyle='rgba(0,255,100,.12)';}
+  ctx.beginPath(); ctx.arc(0,0,f.width/2-8,0,Math.PI*2); ctx.fill(); ctx.shadowBlur=0;
+  const img=fishImages[f.data.name];
+  if(img && img.complete && img.naturalWidth>0){
+    ctx.drawImage(img,-f.width/2,-f.height/2,f.width,f.height);
+  }else{
+    ctx.fillStyle=f.data.color; ctx.beginPath(); ctx.arc(0,0,f.width/2.5,0,Math.PI*2); ctx.fill();
+  }
+  ctx.fillStyle='white'; ctx.font='bold 10px Nunito'; ctx.textAlign='center';
+  ctx.fillText(f.data.name,0,-f.height/2-8);
+  ctx.restore();
+}
 
-function createFish(){let fT,castChance=mercuryLevel>=50?.2:.05;if(Math.random()<castChance)fT=fishData.safe.find(f=>f.name==='Castanha');else{const ok=Math.random()<.6,arr=ok?fishData.safe:fishData.contaminated;fT=arr[Math.floor(Math.random()*arr.length)];}
-const w=fT.name==='Castanha'?60:120;fish.push({x:Math.random()*(canvas.width-w)+w/2,y:-w,width:w,height:w,speed:.8+level*.2,data:fT});}
+/* ---------- Lógica ---------- */
+function init(){
+  resizeCanvas();
+  score=0; level=1; mercuryLevel=0; infoPopupShown=false;
+  lastFactTime=Date.now(); highScore=getPlayerHighScore(playerName); updateHUD();
 
-function checkCollision(p,f){const dx=p.x-f.x,dy
+  player={ x:canvas.width/2, y:canvas.height/2, width:160, height:160, targetX:canvas.width/2 };
+  fish=[]; bubbles=[];
+  const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
+  const w = canvas.width/dpr, h = canvas.height/dpr;
+  player.y = h - 120;
+  for(let i=0;i<15;i++){
+    bubbles.push({ x:Math.random()*w, y:Math.random()*h, radius:Math.random()*10+5, speed:Math.random()*0.5+0.2 });
+  }
+}
+function updateHUD(){
+  scoreEl.textContent=score; highScoreEl.textContent=highScore;
+  levelEl.textContent=level; mercuryBarEl.style.height=mercuryLevel+'%';
+  mercuryPercentEl.textContent=Math.round(mercuryLevel);
+}
+function createFish(){
+  let fishType;
+  const castChance = mercuryLevel>=50 ? 0.2 : 0.05;
+  if(Math.random()<castChance){
+    fishType = fishData.safe.find(f=>f.name==='Castanha');
+  }else{
+    const isSafe = Math.random()<0.6;
+    fishType = (isSafe?fishData.safe:fishData.contaminated)[Math.floor(Math.random()* (isSafe?fishData.safe.length:fishData.contaminated.length))];
+  }
+  const w = (fishType.name==='Castanha')?60:120;
+  fish.push({ x:Math.random()*(canvas.width - w)+w/2, y:-w, width:w, height:w, speed:0.8+level*0.2, data:fishType });
+}
+function checkCollision(p,f){
+  const dx=p.x-f.x, dy=p.y-f.y, dist=Math.sqrt(dx*dx+dy*dy);
+  return dist < (p.width/3 + f.width/3);
+}
+function showMessage(text,color){
+  gameMessageEl.textContent=text; gameMessageEl.style.color=color; gameMessageEl.style.opacity='1';
+  setTimeout(()=>gameMessageEl.style.opacity='0',1000);
+}
+function createParticles(x,y,color){
+  for(let i=0;i<10;i++){
+    const p=document.createElement('div');
+    p.className='particle'; p.style.left=x+'px'; p.style.top=y+'px';
+    p.style.width='5px'; p.style.height='5px'; p.style.backgroundColor=color; p.style.borderRadius='50%';
+    gameContainer.appendChild(p); setTimeout(()=>p.remove(),1000);
+  }
+}
+function showFact(){
+  const fact=educationalFacts[Math.floor(Math.random()*educationalFacts.length)];
+  factDisplayEl.textContent=fact; factDisplayEl.style.opacity='1';
+  setTimeout(()=>factDisplayEl.style.opacity='0',5000);
+}
+
+/* HUD notes no lugar dos pop-ups */
+function showHudNote(text, color='green'){
+  const el=document.getElementById('hud-note');
+  el.classList.remove('bg-green-600','bg-blue-600','bg-yellow-600','bg-red-600','hud-note-show','hidden');
+  const map={green:'bg-green-600',blue:'bg-blue-600',yellow:'bg-yellow-600',red:'bg-red-600'};
+  el.classList.add(map[color]||'bg-green-600'); el.textContent=text; el.classList.add('hud-note-show');
+  levelEl.classList.add('ring','ring-offset-1','ring-green-400','rounded-sm');
+  setTimeout(()=>levelEl.classList.remove('ring','ring-offset-1','ring-green-400','rounded-sm'),1000);
+  setTimeout(()=>{el.classList.add('hidden'); el.classList.remove('hud-note-show');},3000);
+}
+function showInfoModal(){ infoPopupShown=true; showHudNote('ⓘ Dica: carnívoros ↑ Hg','blue'); }
+function levelUp(){ level++; showHudNote(`⬆ Nível ${level}! Peixes +rápidos`,'green'); updateHUD(); }
+
+function gameOver(){
+  gameRunning=false;
+  finalScoreEl.textContent=score; finalLevelEl.textContent=level; finalPlayerNameEl.textContent=playerName;
+  if(score>highScore) newRecordMessageEl.classList.remove('hidden'); else newRecordMessageEl.classList.add('hidden');
+  addToRanking(playerName,score,level);
+  gameOverModal.classList.remove('hidden'); setTimeout(()=>gameOverModal.style.opacity='1',10);
+}
+
+/* Loop */
+function update(){
+  if(!gameRunning) return;
+
+  // mover jogador
+  player.x += (player.targetX - player.x) * 0.1;
+
+  // bolhas
+  const dpr=Math.max(1,Math.floor(window.devicePixelRatio||1));
+  const w=canvas.width/dpr, h=canvas.height/dpr;
+  bubbles.forEach(b=>{ b.y -= b.speed; if(b.y<-20) b.y = h + 20; });
+
+  // peixes
+  for(let i=fish.length-1;i>=0;i--){
+    const f=fish[i]; f.y += f.speed;
+    if(checkCollision(player,f)){
+      score += f.data.points;
+      if(f.data.name==='Castanha'){
+        mercuryLevel += f.data.mercury; showMessage(`Mercúrio ${f.data.mercury}%`,'#00FF00'); createParticles(f.x,f.y,'#00FF00');
+      }else if(f.data.mercury>15){
+        mercuryLevel += f.data.mercury; showMessage(`+${f.data.points} / +${f.data.mercury}% Hg!`,'#FF4500'); createParticles(f.x,f.y,'#FF4500');
+      }else{
+        showMessage(`+${f.data.points} pts!`,'#00FF7F'); createParticles(f.x,f.y,'#00FF7F');
+      }
+      mercuryLevel = Math.max(0, Math.min(100, mercuryLevel));
+      updateHUD();
+      fish.splice(i,1);
+
+      if(mercuryLevel>=100){ gameOver(); return; }
+      if(score>=level*100 && !infoPopupShown && level===1){ showInfoModal(); }
+      if(score>=level*150){ levelUp(); }
+    } else if (f.y > h + 50){
+      fish.splice(i,1);
+    }
+  }
+
+  if(Math.random() < 0.01 + level*0.005) createFish();
+
+  if(Date.now()-lastFactTime>factInterval){ showFact(); lastFactTime=Date.now(); }
+}
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  bubbles.forEach(drawBubble);
+  fish.forEach(drawFish);
+  drawPlayer(player);
+}
+function gameLoop(){ update(); draw(); requestAnimationFrame(gameLoop); }
+
+/* ---------- Input ---------- */
+function setTargetFromClientX(clientX){
+  const rect=canvas.getBoundingClientRect();
+  player.targetX = Math.max(0, Math.min(canvas.width, clientX - rect.left));
+}
+gameContainer.addEventListener('mousemove', e=>setTargetFromClientX(e.clientX));
+gameContainer.addEventListener('touchstart', e=>{const t=e.touches[0]; if(t) setTargetFromClientX(t.clientX);},{passive:true});
+gameContainer.addEventListener('touchmove',  e=>{const t=e.touches[0]; if(t) setTargetFromClientX(t.clientX);},{passive:true});
+
+/* ---------- Eventos UI ---------- */
+nameSubmitButton.addEventListener('click', ()=>{
+  const name=playerNameInput.value.trim();
+  if(!name){ alert('Por favor, digite seu nome!'); return; }
+  playerName=name; playerNameDisplayEl.textContent=playerName;
+  nameModal.style.opacity='0';
+  setTimeout(()=>{
+    nameModal.classList.add('hidden');
+    gameContainer.classList.remove('hidden');
+    startModal.classList.remove('hidden');
+    setTimeout(()=>startModal.style.opacity='1',10);
+  },300);
+});
+playerNameInput.addEventListener('keydown', e=>{ if(e.key==='Enter') nameSubmitButton.click(); });
+
+viewRankingButton.addEventListener('click', ()=>{
+  displayRanking();
+  nameModal.classList.add('hidden');
+  rankingModal.classList.remove('hidden');
+  setTimeout(()=>rankingModal.style.opacity='1',10);
+});
+closeRankingButton.addEventListener('click', ()=>{
+  rankingModal.style.opacity='0';
+  setTimeout(()=>{
+    rankingModal.classList.add('hidden');
+    if(!gameRunning){ nameModal.classList.remove('hidden'); nameModal.style.opacity='1'; }
+  },300);
+});
+viewRankingGameoverButton.addEventListener('click', ()=>{
+  displayRanking();
+  gameOverModal.style.opacity='0';
+  setTimeout(()=>{
+    gameOverModal.classList.add('hidden');
+    rankingModal.classList.remove('hidden');
+    setTimeout(()=>rankingModal.style.opacity='1',10);
+  },300);
+});
+
+startButton.addEventListener('click', ()=>{
+  startModal.style.opacity='0';
+  setTimeout(()=>{
+    startModal.classList.add('hidden');
+    init(); onResize();
+    gameRunning=true; gameLoop();
+  },300);
+});
+restartButton.addEventListener('click', ()=>{
+  gameOverModal.style.opacity='0';
+  setTimeout(()=>{
+    gameOverModal.classList.add('hidden');
+    init(); gameRunning=true; gameLoop();
+  },300);
+});
+</script>
+</body>
+</html>
