@@ -14,17 +14,25 @@
 <style>
   html,body{
     margin:0;padding:0;overflow:hidden;
+    height:100%;width:100%;
     font-family:'Nunito',sans-serif;
     background-color:#0c4a6e;
-    height:100vh;width:100vw;
+  }
+
+  #game-container{
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    background-color:#0c4a6e;
   }
 
   canvas{
     display:block;
+    width:100%;
+    height:100%;
     background-size:cover;
     background-position:center;
-    width:100vw;
-    height:calc(100vh - 90px); /* deixa espaço pro HUD */
   }
 
   /* Fundo por orientação */
@@ -52,13 +60,12 @@
       <p class="mb-4">Digite seu nome para começar:</p>
       <input id="player-name-input" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20" placeholder="Seu nome" autofocus>
       <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
-      <button id="view-ranking-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full">Ver Ranking</button>
     </div>
   </div>
 </div>
 
 <!-- Container do jogo -->
-<div id="game-container" class="hidden flex flex-col w-full h-full">
+<div id="game-container" class="hidden">
   <!-- HUD -->
   <div class="p-3 bg-blue-200/80 text-gray-800 flex justify-between items-center z-20">
     <div class="flex items-center gap-2">
@@ -75,10 +82,13 @@
     </div>
   </div>
 
-  <canvas id="gameCanvas"></canvas>
+  <!-- Canvas -->
+  <div class="flex-1 relative overflow-hidden">
+    <canvas id="gameCanvas" class="absolute inset-0 w-full h-full"></canvas>
+  </div>
 
   <!-- Barra Hg -->
-  <div class="absolute top-24 right-3 w-12 text-center z-10 pointer-events-none">
+  <div class="absolute top-24 right-3 w-12 text-center z-20 pointer-events-none">
     <div class="text-white text-sm font-bold mb-1">Hg</div>
     <div class="relative h-64 w-6 bg-white bg-opacity-30 rounded-full overflow-hidden mx-auto border-2 border-white/50">
       <div id="mercury-bar" class="absolute bottom-0 w-full bg-red-600 transition-all duration-300" style="height:0%;"></div>
@@ -86,7 +96,9 @@
     <div class="text-white text-xs mt-1"><span id="mercury-percent">0</span>%</div>
   </div>
 
-  <div id="game-message" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl font-bold z-20 opacity-0 pointer-events-none text-center drop-shadow-lg"></div>
+  <div id="game-message"
+       class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl font-bold z-30 opacity-0 pointer-events-none text-center drop-shadow-lg">
+  </div>
 </div>
 
 <!-- Modal Início -->
@@ -130,15 +142,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let playerName="",player,score=0,level=1,mercury=0,fish=[],gameRunning=false;
 
-  /* Redimensionamento responsivo */
   function resizeCanvas(){
-    const w=window.innerWidth,h=window.innerHeight;
-    canvas.width=w;canvas.height=h-90;
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
   }
   window.addEventListener("resize",resizeCanvas);
   resizeCanvas();
 
-  /* Dados peixes */
   const fishData=[
     {name:"Tambaqui",points:10,mercury:0,color:"#0f0"},
     {name:"Pacu",points:10,mercury:0,color:"#0f0"},
@@ -149,28 +159,21 @@ document.addEventListener("DOMContentLoaded", () => {
     {name:"Piranha",points:-5,mercury:20,color:"#f00"}
   ];
 
-  /* Player */
-  player={x:window.innerWidth/2,y:canvas.height-120,w:120,h:120,targetX:window.innerWidth/2};
+  player={x:window.innerWidth/2,y:window.innerHeight-120,w:120,h:120,targetX:window.innerWidth/2};
   const img=new Image();img.src="pirarucu m.png";
 
   function drawPlayer(){
     if(img.complete) ctx.drawImage(img,player.x-player.w/2,player.y-player.h/2,player.w,player.h);
   }
 
-  /* Peixes */
   function createFish(){
     const d=fishData[Math.floor(Math.random()*fishData.length)];
-    fish.push({x:Math.random()*canvas.width,y:-50,dx:0,dy:2+d.mercury/25,data:d});
+    fish.push({x:Math.random()*canvas.width,y:-50,dy:2+d.mercury/25,data:d});
   }
 
   function drawFish(f){
     ctx.fillStyle=f.data.color;
     ctx.beginPath();ctx.arc(f.x,f.y,25,0,Math.PI*2);ctx.fill();
-  }
-
-  function updateFish(){
-    fish.forEach(f=>f.y+=f.dy);
-    fish=fish.filter(f=>f.y<canvas.height+50);
   }
 
   function checkCollision(f){
@@ -184,23 +187,23 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(()=>el.style.opacity=0,1000);
   }
 
-  /* Loop */
   function loop(){
     if(!gameRunning)return;
     ctx.clearRect(0,0,canvas.width,canvas.height);
     player.x+=(player.targetX-player.x)*0.1;
     drawPlayer();
-    updateFish();
     fish.forEach(f=>{
+      f.y+=f.dy;
       drawFish(f);
       if(checkCollision(f)){
         score+=f.data.points;
         mercury=Math.max(0,Math.min(100,mercury+f.data.mercury));
-        showMessage(`${f.data.points>0?'+':''}${f.data.points}pts`,f.data.mercury>0?"#f00":"#0f0");
+        showMessage(`${f.data.points>0?'+':''}${f.data.points} pts`,f.data.mercury>0?"#f00":"#0f0");
         fish.splice(fish.indexOf(f),1);
         if(mercury>=100)endGame();
       }
     });
+    if(Math.random()<0.02)createFish();
     mercuryBarEl.style.height=mercury+"%";
     mercuryPercentEl.textContent=mercury;
     scoreEl.textContent=score;
@@ -212,7 +215,6 @@ document.addEventListener("DOMContentLoaded", () => {
     startModal.classList.add("hidden");
     resizeCanvas();
     loop();
-    setInterval(()=>{if(gameRunning)createFish();},800);
   }
 
   function endGame(){
@@ -224,13 +226,11 @@ document.addEventListener("DOMContentLoaded", () => {
     gameOverModal.style.opacity=1;
   }
 
-  /* Controles */
   canvas.addEventListener("mousemove",e=>player.targetX=e.clientX);
   canvas.addEventListener("touchmove",e=>{
     const t=e.touches[0];if(t)player.targetX=t.clientX;
   });
 
-  /* Nome */
   nameSubmitButton.onclick=()=>{
     const n=playerNameInput.value.trim();
     if(!n){alert("Digite seu nome!");return;}
@@ -243,7 +243,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(e.key==="Enter")nameSubmitButton.click();
   });
 
-  /* Começar */
   startButton.onclick=startGame;
   restartButton.onclick=()=>{
     gameOverModal.classList.add("hidden");
