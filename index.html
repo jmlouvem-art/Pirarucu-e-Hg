@@ -46,9 +46,38 @@
     canvas, .modal-water { background-image: url('Fundo do Lago.png'); }
   }
 
-  .modal { transition: opacity .3s ease-in-out; }
-  .particle { position: absolute; pointer-events: none; width: 5px; height: 5px; border-radius: 50%; animation: fade 1s forwards; }
-  @keyframes fade { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.5) translateY(-50px); } }
+  .modal { 
+    transition: opacity .3s ease-in-out; 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  .particle { 
+    position: absolute; 
+    pointer-events: none; 
+    width: 5px; 
+    height: 5px; 
+    border-radius: 50%; 
+    animation: fade 1s forwards; 
+  }
+  @keyframes fade { 
+    0% { opacity: 1; transform: scale(1); } 
+    100% { opacity: 0; transform: scale(.5) translateY(-50px); } 
+  }
+
+  /* Ranking Modal */
+  #ranking-modal {
+    width: 90%;
+    max-width: 400px;
+    height: 80%;
+    overflow-y: auto;
+  }
 </style>
 </head>
 
@@ -315,37 +344,4 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   viewRankingButton.onclick = () => {
-    const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
-    alert(ranking.map((entry, index) => `${index + 1}. ${entry.name} - ${entry.score} pontos (Nível ${entry.level})`).join("\n"));
-  };
-
-  canvas.addEventListener("mousemove", e => player.targetX = e.clientX);
-  canvas.addEventListener("touchmove", e => {
-    const t = e.touches[0];
-    if (t) player.targetX = t.clientX;
-  });
-
-  nameSubmitButton.onclick = () => {
-    const n = playerNameInput.value.trim();
-    if (!n) { alert("Digite seu nome!"); return; }
-    playerName = n;
-    playerNameDisplay.textContent = n;
-    nameModal.classList.add("hidden");
-    startModal.classList.remove("hidden");
-    startModal.style.opacity = 1;
-  };
-
-  playerNameInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") nameSubmitButton.click();
-  });
-
-  startButton.onclick = startGame;
-  restartButton.onclick = () => {
-    gameOverModal.classList.add("hidden");
-    startGame();
-  };
-});
-</script>
-
-</body>
-</html>
+    const ranking = JSON.parse(localStorage.getItem('ranking') || '
