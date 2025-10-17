@@ -166,7 +166,26 @@ document.addEventListener("DOMContentLoaded", () => {
     { name: "Piranha", points: -5, mercury: 20, color: "#f00" }
   ];
 
+  const fishImages = {
+    'Aruanã': new Image(),
+    'Castanha': new Image(),
+    'Pacu': new Image(),
+    'Piranha': new Image(),
+    'Surubim': new Image(),
+    'Tambaqui': new Image(),
+    'Tucunaré': new Image()
+  };
+
+  fishImages['Aruanã'].src = 'Aruana.png';
+  fishImages['Castanha'].src = 'Castanha.png';
+  fishImages['Pacu'].src = 'Pacu.png';
+  fishImages['Piranha'].src = 'Piranha.png';
+  fishImages['Surubim'].src = 'Surubim.png';
+  fishImages['Tambaqui'].src = 'Tambaqui.png';
+  fishImages['Tucunaré'].src = 'Tucunare.png';
+
   player = { x: window.innerWidth / 2, y: window.innerHeight - 120, w: 120, h: 120, targetX: window.innerWidth / 2 };
+
   const img = new Image();
   img.src = "pirarucu m.png";
 
@@ -176,7 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createFish() {
     const d = fishData[Math.floor(Math.random() * fishData.length)];
-    fish.push({ x: Math.random() * canvas.width, y: -50, dy: 2 + d.mercury / 25, data: d });
+    fish.push({ x: Math.random() * canvas.width, y: -50, dy: 2 + d.mercury / 25 + level * 0.2, data: d });
   }
 
   function drawFish(f) {
@@ -184,6 +203,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.beginPath();
     ctx.arc(f.x, f.y, 25, 0, Math.PI * 2);
     ctx.fill();
+    const img = fishImages[f.data.name];
+    if (img && img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, f.x - 25, f.y - 25, 50, 50);
+    }
   }
 
   function checkCollision(f) {
@@ -215,7 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (mercury >= 100) endGame();
       }
     });
-    if (Math.random() < 0.02) createFish();
+    if (Math.random() < (0.02 - level * 0.005)) createFish();
     mercuryBarEl.style.height = mercury + "%";
     mercuryPercentEl.textContent = mercury;
     scoreEl.textContent = score;
@@ -276,5 +299,6 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 });
 </script>
+
 </body>
 </html>
