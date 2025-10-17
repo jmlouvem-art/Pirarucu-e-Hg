@@ -141,6 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
         startButton = document.getElementById("start-button"),
         restartButton = document.getElementById("restart-button"),
         viewRankingButton = document.getElementById("view-ranking-button"),
+        viewRankingNameModal = document.getElementById("view-ranking-name-modal"), // NOVO
         playerNameDisplay = document.getElementById("player-name-display");
 
   let playerName = "", player, score = 0, level = 1, mercury = 0, fish = [], gameRunning = false;
@@ -205,33 +206,38 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function drawFish(f) {
+    // AUMENTO DO TAMANHO: O raio base agora é 60 (era 45)
+    const fishRadius = 60;
+    const haloRadius = 75; // Halo estende-se para 75 (era 60)
+
     ctx.fillStyle = f.data.color;
     ctx.beginPath();
-    ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);  
+    ctx.arc(f.x, f.y, fishRadius, 0, Math.PI * 2);  
     ctx.fill();
 
-    // NOVO HALO COM GRADIENTE
+    // Halo com gradiente transparente
     ctx.save();
-    const gradient = ctx.createRadialGradient(f.x, f.y, 45, f.x, f.y, 60);
+    const gradient = ctx.createRadialGradient(f.x, f.y, fishRadius, f.x, f.y, haloRadius);
     const haloColor = f.data.color;
     gradient.addColorStop(0, haloColor);
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); // Totalmente transparente
     ctx.fillStyle = gradient;
     ctx.beginPath();
-    ctx.arc(f.x, f.y, 60, 0, Math.PI * 2); // Desenha um círculo maior para o halo
+    ctx.arc(f.x, f.y, haloRadius, 0, Math.PI * 2); 
     ctx.fill();
     ctx.restore();
-    // FIM NOVO HALO
 
+    // Desenha a imagem do peixe (120x120 pixels)
     const img = fishImages[f.data.name];
     if (img && img.complete && img.naturalWidth > 0) {
-      ctx.drawImage(img, f.x - 45, f.y - 45, 90, 90);  
+      ctx.drawImage(img, f.x - fishRadius, f.y - fishRadius, fishRadius * 2, fishRadius * 2);  
     }
   }
 
   function checkCollision(f) {
+    // NOVO LIMITE DE COLISÃO: Aumentado para 110 (era 90)
     const dx = f.x - player.x, dy = f.y - player.y, dist = Math.sqrt(dx * dx + dy * dy);
-    return dist < 90;
+    return dist < 110;
   }
 
   function showMessage(msg, color) {
@@ -300,11 +306,15 @@ document.addEventListener("DOMContentLoaded", () => {
     ranking.sort((a, b) => b.score - a.score);
     localStorage.setItem('ranking', JSON.stringify(ranking.slice(0, 10)));
   }
-
-  viewRankingButton.onclick = () => {
+  
+  // LÓGICA DO BOTÃO VER RANKING (REUTILIZADA)
+  const displayRanking = () => {
     const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
     alert(ranking.map((entry, index) => `${index + 1}. ${entry.name} - ${entry.score} pontos (Nível ${entry.level})`).join("\n"));
   };
+
+  viewRankingButton.onclick = displayRanking;
+  viewRankingNameModal.onclick = displayRanking; // NOVO: Botão no modal de nome
 
   canvas.addEventListener("mousemove", e => player.targetX = e.clientX);
   canvas.addEventListener("touchmove", e => {
