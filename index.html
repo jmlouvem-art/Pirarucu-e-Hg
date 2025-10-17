@@ -46,38 +46,9 @@
     canvas, .modal-water { background-image: url('Fundo do Lago.png'); }
   }
 
-  .modal { 
-    transition: opacity .3s ease-in-out; 
-    position: absolute; 
-    top: 50%; 
-    left: 50%; 
-    transform: translate(-50%, -50%);
-    background-color: rgba(255, 255, 255, 0.9);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
-  }
-  
-  .particle { 
-    position: absolute; 
-    pointer-events: none; 
-    width: 5px; 
-    height: 5px; 
-    border-radius: 50%; 
-    animation: fade 1s forwards; 
-  }
-  @keyframes fade { 
-    0% { opacity: 1; transform: scale(1); } 
-    100% { opacity: 0; transform: scale(.5) translateY(-50px); } 
-  }
-
-  /* Ranking Modal */
-  #ranking-modal {
-    width: 90%;
-    max-width: 400px;
-    height: 80%;
-    overflow-y: auto;
-  }
+  .modal { transition: opacity .3s ease-in-out; }
+  .particle { position: absolute; pointer-events: none; width: 5px; height: 5px; border-radius: 50%; animation: fade 1s forwards; }
+  @keyframes fade { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.5) translateY(-50px); } }
 </style>
 </head>
 
@@ -344,4 +315,55 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   viewRankingButton.onclick = () => {
-    const ranking = JSON.parse(localStorage.getItem('ranking') || '
+    const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
+    rankingModal.classList.remove("hidden");
+    setTimeout(() => rankingModal.style.opacity = "1", 10);
+
+    const rankingList = document.getElementById("ranking-list");
+    rankingList.innerHTML = '';
+    ranking.forEach((entry, index) => {
+      const entryElement = document.createElement("div");
+      entryElement.classList.add("mb-2", "p-3", "rounded-lg", "bg-gray-200");
+      entryElement.innerHTML = `
+        <div class="font-bold">${index + 1}. ${entry.name}</div>
+        <div>Pontos: ${entry.score} | Nível: ${entry.level}</div>
+      `;
+      rankingList.appendChild(entryElement);
+    });
+  };
+
+  closeRankingButton.onclick = () => {
+    rankingModal.classList.add("hidden");
+    rankingModal.style.opacity = "0";
+  };
+
+  canvas.addEventListener("mousemove", e => player.targetX = e.clientX);
+  canvas.addEventListener("touchmove", e => {
+    const t = e.touches[0];
+    if (t) player.targetX = t.clientX;
+  });
+
+  nameSubmitButton.onclick = () => {
+    const n = playerNameInput.value.trim();
+    if (!n) { alert("Digite seu nome!"); return; }
+    playerName = n;
+    playerNameDisplay.textContent = n;
+    nameModal.classList.add("hidden");
+    startModal.classList.remove("hidden");
+    startModal.style.opacity = 1;
+  };
+
+  playerNameInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") nameSubmitButton.click();
+  });
+
+  startButton.onclick = startGame;
+  restartButton.onclick = () => {
+    gameOverModal.classList.add("hidden");
+    startGame();
+  };
+});
+</script>
+
+</body>
+</html>
