@@ -196,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (img.complete) ctx.drawImage(img, player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
   }
 
-  let fishSpawnRate = 0.02;  
+  let fishSpawnRate = 0.02;
   let fishSpeed = 2 + level * 0.2;
   let castanhaChance = 0.05;
 
@@ -207,20 +207,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
       fish.push({ x: Math.random() * canvas.width, y: -50, dy: fishSpeed, data: d });
 
-      castanhaChance = Math.max(0.01, castanhaChance - 0.005 * level);  
+      castanhaChance = Math.max(0.01, castanhaChance - 0.005 * level); 
     }
   }
 
   function drawFish(f) {
     ctx.fillStyle = f.data.color;
     ctx.beginPath();
-    ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);  
+    ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.save();
-    ctx.shadowColor = 'rgba(255, 0, 0, 0.3)';
-    ctx.shadowBlur = 15;  
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+    ctx.shadowColor = 'rgba(255, 0, 0, 0.3)'; 
+    ctx.shadowBlur = 20;  // Ajuste de suavidade no halo
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
     ctx.beginPath();
     ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);  
     ctx.fill();
