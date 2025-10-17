@@ -193,9 +193,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (img.complete) ctx.drawImage(img, player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
   }
 
+  // Alterando a taxa de aparição dos peixes e a dificuldade
+  let fishSpawnRate = 0.02 - level * 0.005; // A chance de gerar peixe vai diminuir conforme o nível
+  let fishSpeed = 2 + level * 0.2; // Aumentando a velocidade dos peixes conforme o nível
+
   function createFish() {
-    const d = fishData[Math.floor(Math.random() * fishData.length)];
-    fish.push({ x: Math.random() * canvas.width, y: -50, dy: 2 + d.mercury / 25 + level * 0.2, data: d });
+    // Mudando a chance de criação dos peixes de acordo com o nível
+    if (Math.random() < fishSpawnRate) {
+      const d = fishData[Math.floor(Math.random() * fishData.length)];
+      fish.push({ x: Math.random() * canvas.width, y: -50, dy: fishSpeed, data: d });
+    }
   }
 
   function drawFish(f) {
@@ -238,7 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (mercury >= 100) endGame();
       }
     });
-    if (Math.random() < (0.02 - level * 0.005)) createFish();
+    createFish(); // Criar novos peixes conforme a taxa ajustada
     mercuryBarEl.style.height = mercury + "%";
     mercuryPercentEl.textContent = mercury;
     scoreEl.textContent = score;
@@ -260,6 +267,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function levelUp() {
     level++;
     levelEl.textContent = level;
+    fishSpawnRate = 0.02 - level * 0.005;  // Diminui a chance de spawn conforme o nível
+    fishSpeed = 2 + level * 0.2;  // Aumenta a velocidade de queda dos peixes
     showMessage(`Nível ${level}!`, "#0f0");
   }
 
