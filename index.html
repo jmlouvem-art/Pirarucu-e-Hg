@@ -194,8 +194,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Alterando a taxa de aparição dos peixes e a dificuldade
-  let fishSpawnRate = 0.02;  // A chance de gerar peixe vai continuar fixa
-  let fishSpeed = 2 + level * 0.2; // Aumentando a velocidade dos peixes conforme o nível
+  let fishSpawnRate = 0.05;  // A chance de gerar peixe vai continuar fixa
+  let fishSpeed = 2 + level * 0.5; // Aumentando a velocidade dos peixes conforme o nível
   let castanhaChance = 0.05; // Chance inicial da Castanha aparecer
 
   function createFish() {
@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
       fish.push({ x: Math.random() * canvas.width, y: -50, dy: fishSpeed, data: d });
 
       // Reduz a chance da Castanha aparecer conforme o nível
-      castanhaChance = Math.max(0.01, castanhaChance - 0.005 * level);  // Nunca menos que 1% de chance
+      castanhaChance = Math.max(0.01, castanhaChance - 0.02 * level);  // Nunca menos que 1% de chance
     }
   }
 
@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function levelUp() {
     level++;
     levelEl.textContent = level;
-    fishSpeed = 2 + level * 0.2;  // Aumenta a velocidade de queda dos peixes
+    fishSpeed = 2 + level * 0.5;  // Aumenta a velocidade de queda dos peixes
     showMessage(`Nível ${level}!`, "#0f0");
   }
 
