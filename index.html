@@ -5,37 +5,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Pirarucu Aventureiro</title>
 
-<meta name="theme-color" content="#1e40af">
+<link rel="icon" type="image/png" href="logo 2.png" sizes="32x32">
+<link rel="apple-touch-icon" href="logo 2.png">
+<meta name="theme-color" content="#f59e0b">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    height: 100%;
-    width: 100%;
-    font-family: 'Nunito', sans-serif;
-    background-color: #0c4a6e;
-  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
+    font-family: 'Nunito', sans-serif;
+    background-color: #0c4a6e;
+  }
 
-  #game-container {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    background-color: #0c4a6e;
-  }
+  #game-container {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background-color: #0c4a6e;
+  }
 
-  canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background-color: #1e40af; /* Azul Médio */
-  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+  }
 
-  .modal { transition: opacity .3s ease-in-out; }
+  /* Fundo por orientação */
+  @media (orientation: landscape) {
+    canvas, .modal-water { background-image: url('Fundo pc.png'); }
+  }
+  @media (orientation: portrait) {
+    canvas, .modal-water { background-image: url('Fundo do Lago.png'); }
+  }
+
+  .modal { transition: opacity .3s ease-in-out; }
+  .particle { position: absolute; pointer-events: none; width: 5px; height: 5px; border-radius: 50%; animation: fade 1s forwards; }
+  @keyframes fade { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.5) translateY(-50px); } }
 </style>
 </head>
 
@@ -43,395 +56,284 @@
 
 <!-- Modal Nome -->
 <div id="name-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120]">
-  <div class="rounded-lg p-6 text-center shadow-xl max-w-sm w-full bg-blue-100 border-4 border-blue-500">
-    <div class="p-4 shadow-md">
-      <div class="flex justify-center mb-4 text-4xl">🐟</div>
-      <h2 class="text-3xl font-extrabold mb-4 text-blue-800">Bem-vindo!</h2>
-      <p class="mb-4 text-gray-600">Digite seu nome para começar:</p>
-      <input id="player-name-input" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center focus:ring-blue-500 focus:border-blue-500" maxlength="20" placeholder="Seu nome" autofocus>
-      <button id="name-submit-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl w-full mb-3 shadow-lg transform transition duration-150 hover:scale-[1.02]">
-        Continuar
-      </button>
-      <button id="view-ranking-name-modal" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-xl w-full shadow-md">
-        Ver Ranking Local
-      </button>
-    </div>
-  </div>
+  <div class="rounded-lg p-6 text-center shadow-xl max-w-sm w-full bg-cover bg-center modal-water">
+    <div class="bg-white bg-opacity-80 p-4 shadow-md">
+      <div class="flex justify-center mb-4"><img src="logo 2.png" class="w-[210px] h-auto shadow-lg" alt=""></div>
+      <h2 class="text-2xl font-bold mb-4">🐟 Bem-vindo!</h2>
+      <p class="mb-4">Digite seu nome para começar:</p>
+      <input id="player-name-input" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20" placeholder="Seu nome" autofocus>
+      <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
+      <button id="view-ranking-name-modal" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Ver Ranking</button>
+    </div>
+  </div>
 </div>
 
 <!-- Container do jogo -->
 <div id="game-container" class="hidden">
-  <!-- HUD -->
-  <div class="p-3 bg-blue-900/90 text-white flex justify-between items-center z-20 border-b-4 border-blue-300">
-    <div class="flex items-center gap-3">
-      <div class="text-3xl">🎣</div>
-      <div>
-        <h1 class="text-lg font-bold">Pirarucu Aventureiro</h1>
-        <div class="text-sm">Jogador: <span id="player-name-display" class="font-extrabold text-yellow-300">-</span></div>
-      </div>
-    </div>
-    <div class="text-right">
-      <div class="text-xl font-extrabold">Pontos: <span id="score">0</span></div>
-      <div class="text-sm">Nível: <span id="level">1</span></div>
-    </div>
-  </div>
+  <!-- HUD -->
+  <div class="p-3 bg-blue-200/80 text-gray-800 flex justify-between items-center z-20">
+    <div class="flex items-center gap-2">
+      <img src="logo 2.png" class="w-8 h-8 object-contain" alt="">
+      <div>
+        <h1 class="text-lg font-bold">Pirarucu Aventureiro</h1>
+        <div class="text-xs">Jogador: <span id="player-name-display" class="font-bold">-</span></div>
+        <div class="text-xs">Nível: <span id="level">1</span></div>
+      </div>
+    </div>
+    <div class="text-right">
+      <div class="font-bold">Pontos: <span id="score">0</span></div>
+      <div class="text-xs">Recorde: <span id="high-score">0</span></div>
+    </div>
+  </div>
 
-  <!-- Canvas -->
-  <div class="flex-1 relative overflow-hidden">
-    <canvas id="gameCanvas" class="absolute inset-0 w-full h-full"></canvas>
-  </div>
+  <!-- Canvas -->
+  <div class="flex-1 relative overflow-hidden">
+    <canvas id="gameCanvas" class="absolute inset-0 w-full h-full"></canvas>
+  </div>
 
-  <!-- Barra Hg -->
-  <div class="absolute top-24 right-3 w-12 text-center z-20 pointer-events-none">
-    <div class="text-white text-sm font-bold mb-1">Hg</div>
-    <div class="relative h-64 w-6 bg-white bg-opacity-30 rounded-full overflow-hidden mx-auto border-2 border-white/50 shadow-inner">
-      <div id="mercury-bar" class="absolute bottom-0 w-full bg-red-600 transition-all duration-300" style="height:0%;"></div>
-    </div>
-    <div class="text-white text-xs mt-1"><span id="mercury-percent">0</span>%</div>
-  </div>
+  <!-- Barra Hg -->
+  <div class="absolute top-24 right-3 w-12 text-center z-20 pointer-events-none">
+    <div class="text-white text-sm font-bold mb-1">Hg</div>
+    <div class="relative h-64 w-6 bg-white bg-opacity-30 rounded-full overflow-hidden mx-auto border-2 border-white/50">
+      <div id="mercury-bar" class="absolute bottom-0 w-full bg-red-600 transition-all duration-300" style="height:0%;"></div>
+    </div>
+    <div class="text-white text-xs mt-1"><span id="mercury-percent">0</span>%</div>
+  </div>
 
-  <div id="game-message"
-       class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl font-extrabold z-30 opacity-0 pointer-events-none text-center drop-shadow-2xl">
-  </div>
+  <div id="game-message"
+       class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-3xl font-bold z-30 opacity-0 pointer-events-none text-center drop-shadow-lg">
+  </div>
 </div>
 
 <!-- Modal Início -->
 <div id="start-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
-  <div class="bg-blue-100 rounded-lg p-6 text-center shadow-xl w-full max-w-md mx-auto border-4 border-blue-500">
-    <div class="text-4xl mb-4">🐠</div>
-    <h2 class="text-3xl font-extrabold mb-4 text-blue-800">Pirarucu Aventureiro</h2>
-    <p class="mb-3 text-sm text-gray-700 font-bold">🎯 Colete peixes seguros e EVITE os contaminados!</p>
-    <p class="mb-6 text-sm text-gray-700">Arraste o dedo ou o mouse para mover o Pirarucu.</p>
-    <button id="start-button" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl w-full shadow-lg transform transition duration-150 hover:scale-[1.02]">
-      Começar a Pescar!
-    </button>
-  </div>
+  <div class="bg-white rounded-lg p-6 text-center shadow-xl w-full max-w-md mx-auto">
+    <img src="logo 2.png" class="mx-auto mb-4 w-40 h-auto shadow" alt="">
+    <h2 class="text-2xl font-bold mb-2">🐟 Pirarucu Aventureiro</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-4">
+      <p class="font-bold text-green-600">🟢 Peixes Seguros:<br>Tambaqui, Pacu, Aruanã</p>
+      <p class="font-bold text-red-600">🔴 Contaminados:<br>Tucunaré, Surubim, Piranha</p>
+    </div>
+    <p class="mb-3 text-sm">Colete peixes seguros e evite os contaminados!</p>
+    <p class="mb-6 text-sm">Arraste o dedo ou o mouse para mover o Pirarucu.</p>
+    <button id="start-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Começar</button>
+  </div>
 </div>
 
 <!-- Game Over -->
 <div id="game-over-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
-  <div class="bg-blue-100 rounded-lg p-6 text-center shadow-2xl max-w-sm border-4 border-red-600">
-    <h2 class="text-4xl font-extrabold mb-4 text-red-700">☠️ FIM DE JOGO ☠️</h2>
-    <p class="text-lg mb-2">Jogador: <span id="final-player-name" class="font-extrabold text-blue-800">-</span></p>
-    <p class="text-2xl font-bold mb-4">Pontuação: <span id="final-score" class="text-green-600">0</span></p>
-    <p class="text-lg mb-6">Nível Máximo: <span id="final-level" class="font-bold">1</span></p>
-    <button id="restart-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl w-full mb-3 shadow-lg transform transition duration-150 hover:scale-[1.02]">
-      Jogar Novamente
-    </button>
-    <button id="view-ranking-button" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-xl w-full shadow-md">
-      Ver Ranking Local
-    </button>
-  </div>
+  <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-sm">
+    <h2 class="text-2xl font-bold mb-2 text-red-600">Fim de Jogo</h2>
+    <p>Jogador: <span id="final-player-name" class="font-bold">-</span></p>
+    <p>Pontuação: <span id="final-score" class="font-bold text-blue-600">0</span></p>
+    <p>Nível: <span id="final-level" class="font-bold">1</span></p>
+    <button id="restart-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Jogar Novamente</button>
+    <button id="view-ranking-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Ver Ranking</button>
+  </div>
 </div>
-
-<!-- Ranking Modal -->
-<div id="ranking-modal" class="modal fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-[130] opacity-0">
-  <div class="bg-blue-100 rounded-lg p-6 text-center shadow-2xl max-w-md w-full border-4 border-blue-600">
-    <h2 class="text-3xl font-extrabold mb-4 text-blue-800">🏆 Ranking Local 🏆</h2>
-    <ol id="ranking-list" class="list-decimal list-inside text-left mx-auto max-w-xs mb-6 p-4 bg-white rounded-lg shadow-inner text-lg">
-      <!-- Itens do ranking serão inseridos aqui -->
-      <li class="text-gray-500">Nenhum recorde salvo.</li>
-    </ol>
-    <button id="close-ranking-modal" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl w-full shadow-md">Fechar</button>
-  </div>
-</div>
-
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const canvas = document.getElementById("gameCanvas"),
-        ctx = canvas.getContext("2d");
-  const scoreEl = document.getElementById("score"),
-        levelEl = document.getElementById("level"),
-        mercuryBarEl = document.getElementById("mercury-bar"),
-        mercuryPercentEl = document.getElementById("mercury-percent"),
-        nameModal = document.getElementById("name-modal"),
-        startModal = document.getElementById("start-modal"),
-        gameOverModal = document.getElementById("game-over-modal"),
-        nameSubmitButton = document.getElementById("name-submit-button"),
-        playerNameInput = document.getElementById("player-name-input"),
-        startButton = document.getElementById("start-button"),
-        restartButton = document.getElementById("restart-button"),
-        viewRankingButton = document.getElementById("view-ranking-button"),
-        viewRankingNameModal = document.getElementById("view-ranking-name-modal"),
-        rankingModal = document.getElementById("ranking-modal"),
-        closeRankingModal = document.getElementById("close-ranking-modal"),
-        rankingList = document.getElementById("ranking-list"),
-        playerNameDisplay = document.getElementById("player-name-display");
+  const canvas = document.getElementById("gameCanvas"),
+        ctx = canvas.getContext("2d");
+  const scoreEl = document.getElementById("score"),
+        levelEl = document.getElementById("level"),
+        mercuryBarEl = document.getElementById("mercury-bar"),
+        mercuryPercentEl = document.getElementById("mercury-percent"),
+        nameModal = document.getElementById("name-modal"),
+        startModal = document.getElementById("start-modal"),
+        gameOverModal = document.getElementById("game-over-modal"),
+        nameSubmitButton = document.getElementById("name-submit-button"),
+        playerNameInput = document.getElementById("player-name-input"),
+        startButton = document.getElementById("start-button"),
+        restartButton = document.getElementById("restart-button"),
+        viewRankingButton = document.getElementById("view-ranking-button"),
+        playerNameDisplay = document.getElementById("player-name-display");
 
-  let playerName = "", player, score = 0, level = 1, mercury = 0, fish = [], gameRunning = false;
+  let playerName = "", player, score = 0, level = 1, mercury = 0, fish = [], gameRunning = false;
 
-  // --- Configurações Visuais e Dimensões ---
-  const FISH_RADIUS = 60; // Raio base dos peixes (maior)
-  const FISH_DRAW_SIZE = FISH_RADIUS * 2; // Tamanho de desenho (120x120 pixels)
-  const HALO_RADIUS = 75; // Raio do halo
-  const COLLISION_THRESHOLD = 110; // Distância para colisão
-  const PLAYER_W = 160;
-  const PLAYER_H = 160;
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
 
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener("resize", resizeCanvas);
-  resizeCanvas();
+  const fishData = [
+    { name: "Tambaqui", points: 10, mercury: 0, color: "#0f0" },
+    { name: "Pacu", points: 10, mercury: 0, color: "#0f0" },
+    { name: "Aruanã", points: 15, mercury: 0, color: "#0f0" },
+    { name: "Castanha", points: 20, mercury: -10, color: "#ff0" },
+    { name: "Tucunaré", points: -5, mercury: 25, color: "#f00" },
+    { name: "Surubim", points: -5, mercury: 30, color: "#f00" },
+    { name: "Piranha", points: -5, mercury: 20, color: "#f00" }
+  ];
 
-  const fishData = [
-    { name: "Tambaqui", points: 10, mercury: 0, color: "#0f0" },
-    { name: "Pacu", points: 10, mercury: 0, color: "#0f0" },
-    { name: "Aruanã", points: 15, mercury: 0, color: "#0f0" },
-    { name: "Castanha", points: 20, mercury: -15, color: "#ff0" },
-    { name: "Tucunaré", points: -5, mercury: 25, color: "#f00" },
-    { name: "Surubim", points: -5, mercury: 30, color: "#f00" },
-    { name: "Piranha", points: -5, mercury: 20, color: "#f00" }
-  ];
-  
-  // --- Carregamento de Imagens (Preparado para PNGs externas) ---
+  const fishImages = {
+    'Aruanã': new Image(),
+    'Castanha': new Image(),
+    'Pacu': new Image(),
+    'Piranha': new Image(),
+    'Surubim': new Image(),
+    'Tambaqui': new Image(),
+    'Tucunaré': new Image()
+  };
 
-  // URL de Placeholder (IMAGEM SIMPLES CINZA)
-  // NOTE: O usuário DEVE substituir esta URL pelo caminho real do arquivo PNG no servidor.
-  const PLACEHOLDER_URL = 'https://placehold.co/100x100/AAAAAA/AAAAAA?text=';
+  fishImages['Aruanã'].src = 'Aruana.png';
+  fishImages['Castanha'].src = 'Castanha.png';
+  fishImages['Pacu'].src = 'Pacu.png';
+  fishImages['Piranha'].src = 'Piranha.png';
+  fishImages['Surubim'].src = 'Surubim.png';
+  fishImages['Tambaqui'].src = 'Tambaqui.png';
+  fishImages['Tucunaré'].src = 'Tucunare.png';
 
-  const fishImages = {};
-  const imageNames = ["Aruanã", "Castanha", "Pacu", "Piranha", "Surubim", "Tambaqui", "Tucunaré"];
+  player = { x: window.innerWidth / 2, y: window.innerHeight - 120, w: 160, h: 160, targetX: window.innerWidth / 2 };
 
-  imageNames.forEach(name => {
-    const img = new Image();
-    // Usa o PLACEHOLDER_URL. Substitua 'Aruana.png' pelo caminho real se necessário.
-    img.src = `${PLACEHOLDER_URL}${name}`; // Adiciona o nome como texto para distinguir
-    img.onerror = () => { console.error(`Erro ao carregar imagem: ${name}.png. Verifique o caminho.`); };
-    fishImages[name] = img;
-  });
-  
-  // Imagem do Jogador (Pirarucu)
-  const playerImg = new Image();
-  playerImg.src = `${PLACEHOLDER_URL}Pirarucu`; // Use o caminho real: 'pirarucu m.png';
-  
-  player = { x: window.innerWidth / 2, y: window.innerHeight - 120, w: PLAYER_W, h: PLAYER_H, targetX: window.innerWidth / 2 };
+  const img = new Image();
+  img.src = "pirarucu m.png";
 
-  function drawPlayer() {
-    // Desenha a imagem do Pirarucu (Jogador)
-    if (playerImg.complete) {
-      ctx.drawImage(playerImg, player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
-    } else {
-      // Fallback: Desenha um quadrado de cor sólida se a imagem não carregar
-      ctx.fillStyle = "#ff6600"; 
-      ctx.fillRect(player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
-      ctx.fillStyle = "white";
-      ctx.fillText("P", player.x, player.y);
-    }
-  }
+  function drawPlayer() {
+    if (img.complete) ctx.drawImage(img, player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
+  }
 
-  let fishSpawnRate = 0.02;  
-  let fishSpeed = 2 + level * 0.2;
-  let castanhaChance = 0.05;
+  let fishSpawnRate = 0.02;  
+  let fishSpeed = 2 + level * 0.2;
+  let castanhaChance = 0.05;
 
-  function createFish() {
-    if (Math.random() < fishSpawnRate) {
-      const isCastanha = Math.random() < castanhaChance;
-      const availableFish = isCastanha ? [fishData.find(f => f.name === 'Castanha')] : fishData.filter(f => f.name !== 'Castanha');
-      
-      const d = availableFish[Math.floor(Math.random() * availableFish.length)];
+  function createFish() {
+    if (Math.random() < fishSpawnRate) {
+      const isCastanha = Math.random() < castanhaChance;
+      const d = isCastanha ? fishData.find(f => f.name === 'Castanha') : fishData[Math.floor(Math.random() * fishData.length)];
 
-      fish.push({ x: Math.random() * canvas.width, y: -50, dy: fishSpeed, data: d });
+      fish.push({ x: Math.random() * canvas.width, y: -50, dy: fishSpeed, data: d });
 
-      castanhaChance = Math.max(0.01, castanhaChance - 0.005 * level);  
-    }
-  }
+      castanhaChance = Math.max(0.01, castanhaChance - 0.005 * level);  
+    }
+  }
 
-  function drawFish(f) {
-    // 1. Desenha o círculo de cor (base)
-    ctx.fillStyle = f.data.color;
-    ctx.beginPath();
-    ctx.arc(f.x, f.y, FISH_RADIUS, 0, Math.PI * 2);  
-    ctx.fill();
+  function drawFish(f) {
+    ctx.fillStyle = f.data.color;
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);  
+    ctx.fill();
 
-    // 2. Halo com gradiente transparente
-    ctx.save();
-    const gradient = ctx.createRadialGradient(f.x, f.y, FISH_RADIUS, f.x, f.y, HALO_RADIUS);
-    let startColor;
-    
-    if (f.data.name === 'Castanha') {
-      startColor = 'rgba(255, 255, 0, 0.7)'; // Amarelo forte
-    } else if (f.data.mercury > 0) {
-      startColor = 'rgba(255, 0, 0, 0.4)'; // Vermelho suave para contaminados
-    } else {
-      startColor = 'rgba(0, 255, 0, 0.3)'; // Verde suave para seguros
-    }
+    ctx.save();
+    ctx.shadowColor = 'rgba(255, 0, 0, 0.3)';
+    ctx.shadowBlur = 15;  
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);  
+    ctx.fill();
+    ctx.restore();
 
-    gradient.addColorStop(0, startColor);
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(f.x, f.y, HALO_RADIUS, 0, Math.PI * 2); 
-    ctx.fill();
-    ctx.restore();
+    const img = fishImages[f.data.name];
+    if (img && img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, f.x - 45, f.y - 45, 90, 90);  
+    }
+  }
 
-    // 3. Desenha a imagem do peixe (PNG)
-    const img = fishImages[f.data.name];
-    if (img && img.complete) {
-      // Usa FISH_DRAW_SIZE (120x120) para o desenho
-      ctx.drawImage(img, f.x - FISH_RADIUS, f.y - FISH_RADIUS, FISH_DRAW_SIZE, FISH_DRAW_SIZE);  
-    } else {
-      // Fallback: Exibe o nome se a imagem PNG falhar
-      ctx.save();
-      ctx.font = "18px Arial";
-      ctx.fillStyle = "black";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(f.data.name, f.x, f.y);
-      ctx.restore();
-    }
-  }
+  function checkCollision(f) {
+    const dx = f.x - player.x, dy = f.y - player.y, dist = Math.sqrt(dx * dx + dy * dy);
+    return dist < 90;
+  }
 
-  function checkCollision(f) {
-    const dx = f.x - player.x, dy = f.y - player.y, dist = Math.sqrt(dx * dx + dy * dy);
-    return dist < COLLISION_THRESHOLD;
-  }
+  function showMessage(msg, color) {
+    const el = document.getElementById("game-message");
+    el.textContent = msg;
+    el.style.color = color;
+    el.style.opacity = 1;
+    setTimeout(() => el.style.opacity = 0, 1000);
+  }
 
-  function showMessage(msg, color) {
-    const el = document.getElementById("game-message");
-    el.textContent = msg;
-    el.style.color = color;
-    el.style.opacity = 1;
-    el.style.transition = 'opacity 0.2s';
-    setTimeout(() => el.style.opacity = 0, 1200);
-  }
+  function loop() {
+    if (!gameRunning) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    player.x += (player.targetX - player.x) * 0.1;
+    drawPlayer();
+    fish.forEach(f => {
+      f.y += f.dy;
+      drawFish(f);
+      if (checkCollision(f)) {
+        score += f.data.points;
+        mercury = Math.max(0, Math.min(100, mercury + f.data.mercury));
+        showMessage(`${f.data.points > 0 ? '+' : ''}${f.data.points} pts`, f.data.mercury > 0 ? "#f00" : "#0f0");
+        fish.splice(fish.indexOf(f), 1);
+        if (mercury >= 100) endGame();
+      }
+    });
+    createFish();  
+    mercuryBarEl.style.height = mercury + "%";
+    mercuryPercentEl.textContent = mercury;
+    scoreEl.textContent = score;
+    if (score >= level * 100) levelUp();
+    requestAnimationFrame(loop);
+  }
 
-  function loop() {
-    if (!gameRunning) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    player.x += (player.targetX - player.x) * 0.15;
-    
-    drawPlayer();
-    
-    for (let i = fish.length - 1; i >= 0; i--) {
-      const f = fish[i];
-      f.y += f.dy;
-      drawFish(f);
-      
-      if (checkCollision(f)) {
-        score += f.data.points;
-        mercury = Math.max(0, Math.min(100, mercury + f.data.mercury));
-        showMessage(`${f.data.points > 0 ? '+' : ''}${f.data.points} pts`, f.data.mercury > 0 ? "#f00" : "#0f0");
-        fish.splice(i, 1);
-        if (mercury >= 100) {
-          endGame();
-          return;
-        }
-      } else if (f.y > canvas.height + 50) {
-        fish.splice(i, 1);
-      }
-    }
-    
-    createFish();  
-    mercuryBarEl.style.height = mercury + "%";
-    mercuryPercentEl.textContent = mercury;
-    scoreEl.textContent = score;
-    if (score >= level * 100) levelUp();
-    requestAnimationFrame(loop);
-  }
+  function startGame() {
+    score = 0;
+    level = 1;
+    mercury = 0;
+    fish = [];
+    gameRunning = true;
+    startModal.classList.add("hidden");
+    resizeCanvas();
+    loop();
+  }
 
-  function startGame() {
-    score = 0;
-    level = 1;
-    mercury = 0;
-    fish = [];
-    gameRunning = true;
-    startModal.classList.add("hidden");
-    document.getElementById("game-container").classList.remove("hidden");
-    resizeCanvas();
-    loop();
-  }
+  function levelUp() {
+    level++;
+    levelEl.textContent = level;
+    fishSpeed = 2 + level * 0.2;
+    showMessage(`Nível ${level}!`, "#0f0");
+  }
 
-  function levelUp() {
-    level++;
-    levelEl.textContent = level;
-    fishSpeed = 2 + level * 0.2;
-    fishSpawnRate = Math.min(0.1, fishSpawnRate + 0.005);
-    showMessage(`Nível ${level}!`, "#0f0");
-  }
+  function endGame() {
+    gameRunning = false;
+    document.getElementById("final-score").textContent = score;
+    document.getElementById("final-level").textContent = level;
+    document.getElementById("final-player-name").textContent = playerName;
+    gameOverModal.classList.remove("hidden");
+    gameOverModal.style.opacity = 1;
+    saveRanking();
+  }
 
-  function endGame() {
-    gameRunning = false;
-    document.getElementById("final-score").textContent = score;
-    document.getElementById("final-level").textContent = level;
-    document.getElementById("final-player-name").textContent = playerName;
-    gameOverModal.classList.remove("hidden");
-    gameOverModal.style.opacity = 1;
-    saveRanking();
-  }
+  function saveRanking() {
+    const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
+    ranking.push({ name: playerName, score, level });
+    ranking.sort((a, b) => b.score - a.score);
+    localStorage.setItem('ranking', JSON.stringify(ranking.slice(0, 10)));
+  }
 
-  function saveRanking() {
-    const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
-    ranking.push({ name: playerName, score, level });
-    ranking.sort((a, b) => b.score - a.score);
-    localStorage.setItem('ranking', JSON.stringify(ranking.slice(0, 10)));
-  }
-  
-  function displayRankingModal() {
-    const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
-    rankingList.innerHTML = '';
-    
-    if (ranking.length === 0) {
-      rankingList.innerHTML = '<li class="text-gray-500 text-center">Nenhum recorde salvo neste dispositivo.</li>';
-    } else {
-      ranking.forEach((entry, index) => {
-        const li = document.createElement('li');
-        li.className = "py-1 border-b border-gray-200 last:border-b-0 flex justify-between items-center";
-        
-        const rankText = `${index + 1}. ${entry.name}`;
-        const scoreText = `${entry.score} pts (N${entry.level})`;
-        
-        li.innerHTML = `
-          <span>${rankText}</span>
-          <span class="font-bold text-blue-600">${scoreText}</span>
-        `;
-        rankingList.appendChild(li);
-      });
-    }
+  viewRankingButton.onclick = () => {
+    const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
+    alert(ranking.map((entry, index) => `${index + 1}. ${entry.name} - ${entry.score} pontos (Nível ${entry.level})`).join("\n"));
+  };
 
-    rankingModal.classList.remove("hidden");
-    setTimeout(() => rankingModal.style.opacity = 1, 10);
-  }
+  canvas.addEventListener("mousemove", e => player.targetX = e.clientX);
+  canvas.addEventListener("touchmove", e => {
+    const t = e.touches[0];
+    if (t) player.targetX = t.clientX;
+  });
 
-  // LIGAÇÃO DOS EVENTOS
-  viewRankingButton.onclick = displayRankingModal;
-  viewRankingNameModal.onclick = displayRankingModal;
+  nameSubmitButton.onclick = () => {
+    const n = playerNameInput.value.trim();
+    if (!n) { alert("Digite seu nome!"); return; }
+    playerName = n;
+    playerNameDisplay.textContent = n;
+    nameModal.classList.add("hidden");
+    startModal.classList.remove("hidden");
+    startModal.style.opacity = 1;
+  };
 
-  closeRankingModal.onclick = () => {
-    rankingModal.style.opacity = 0;
-    setTimeout(() => rankingModal.classList.add("hidden"), 300);
-  };
+  playerNameInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") nameSubmitButton.click();
+  });
 
-  canvas.addEventListener("mousemove", e => player.targetX = e.clientX);
-  canvas.addEventListener("touchmove", e => {
-    const t = e.touches[0];
-    if (t) player.targetX = t.clientX;
-  });
-
-  nameSubmitButton.onclick = () => {
-    const n = playerNameInput.value.trim();
-    if (!n) { showMessage("Digite seu nome!", "red"); return; }
-    playerName = n;
-    playerNameDisplay.textContent = n;
-    nameModal.style.opacity = 0;
-    setTimeout(() => nameModal.classList.add("hidden"), 300);
-    startModal.classList.remove("hidden");
-    startModal.style.opacity = 1;
-  };
-
-  playerNameInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") nameSubmitButton.click();
-  });
-
-  startButton.onclick = startGame;
-  restartButton.onclick = () => {
-    gameOverModal.style.opacity = 0;
-    setTimeout(() => gameOverModal.classList.add("hidden"), 300);
-    startGame();
-  };
+  startButton.onclick = startGame;
+  restartButton.onclick = () => {
+    gameOverModal.classList.add("hidden");
+    startGame();
+  };
 });
 </script>
 
