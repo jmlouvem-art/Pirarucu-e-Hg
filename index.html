@@ -63,6 +63,7 @@
       <p class="mb-4">Digite seu nome para começar:</p>
       <input id="player-name-input" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20" placeholder="Seu nome" autofocus>
       <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
+      <button id="view-ranking-name-modal" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Ver Ranking</button>
     </div>
   </div>
 </div>
@@ -195,9 +196,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (img.complete) ctx.drawImage(img, player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
   }
 
-  let fishSpawnRate = 0.02;  // A chance de gerar peixe vai continuar fixa
-  let fishSpeed = 2 + level * 0.2; // Aumentando a velocidade dos peixes conforme o nível
-  let castanhaChance = 0.05; // Chance inicial da Castanha aparecer
+  let fishSpawnRate = 0.02;  
+  let fishSpeed = 2 + level * 0.2;
+  let castanhaChance = 0.05;
 
   function createFish() {
     if (Math.random() < fishSpawnRate) {
@@ -206,30 +207,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
       fish.push({ x: Math.random() * canvas.width, y: -50, dy: fishSpeed, data: d });
 
-      // Reduz a chance da Castanha aparecer conforme o nível
-      castanhaChance = Math.max(0.01, castanhaChance - 0.005 * level);  // Nunca menos que 1% de chance
+      castanhaChance = Math.max(0.01, castanhaChance - 0.005 * level);  
     }
   }
 
   function drawFish(f) {
     ctx.fillStyle = f.data.color;
     ctx.beginPath();
-    ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);  // Aumentei o tamanho do peixe
+    ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);  
     ctx.fill();
 
-    // Adicionando o halo transparente
     ctx.save();
     ctx.shadowColor = 'rgba(255, 0, 0, 0.3)';
-    ctx.shadowBlur = 15;  // Maior blur para o halo
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.2)'; // Cor do halo
+    ctx.shadowBlur = 15;  
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
     ctx.beginPath();
-    ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);  // Aumentando o halo
+    ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);  
     ctx.fill();
     ctx.restore();
 
     const img = fishImages[f.data.name];
     if (img && img.complete && img.naturalWidth > 0) {
-      ctx.drawImage(img, f.x - 45, f.y - 45, 90, 90);  // Ajustei o tamanho do peixe
+      ctx.drawImage(img, f.x - 45, f.y - 45, 90, 90);  
     }
   }
 
@@ -262,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (mercury >= 100) endGame();
       }
     });
-    createFish();
+    createFish();  
     mercuryBarEl.style.height = mercury + "%";
     mercuryPercentEl.textContent = mercury;
     scoreEl.textContent = score;
@@ -284,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function levelUp() {
     level++;
     levelEl.textContent = level;
-    fishSpeed = 2 + level * 0.2;  // Aumenta a velocidade de queda dos peixes
+    fishSpeed = 2 + level * 0.2;
     showMessage(`Nível ${level}!`, "#0f0");
   }
 
@@ -298,15 +297,13 @@ document.addEventListener("DOMContentLoaded", () => {
     saveRanking();
   }
 
-  // Função para salvar o ranking no localStorage
   function saveRanking() {
     const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
     ranking.push({ name: playerName, score, level });
     ranking.sort((a, b) => b.score - a.score);
-    localStorage.setItem('ranking', JSON.stringify(ranking.slice(0, 10)));  // Limita a 10 melhores
+    localStorage.setItem('ranking', JSON.stringify(ranking.slice(0, 10)));
   }
 
-  // Função para mostrar o ranking
   viewRankingButton.onclick = () => {
     const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
     alert(ranking.map((entry, index) => `${index + 1}. ${entry.name} - ${entry.score} pontos (Nível ${entry.level})`).join("\n"));
