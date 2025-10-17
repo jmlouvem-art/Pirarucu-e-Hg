@@ -217,15 +217,24 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);
     ctx.fill();
 
+    // Ajuste do Halo: Definindo cor diferente de acordo com o tipo de peixe
     ctx.save();
-    ctx.shadowColor = 'rgba(255, 0, 0, 0.3)'; 
-    ctx.shadowBlur = 20;  // Ajuste de suavidade no halo
-    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
+    if (f.data.mercury > 0) {
+        // Para peixes contaminados (vermelho)
+        ctx.shadowColor = 'rgba(255, 0, 0, 0.3)'; // Cor do halo vermelho com transparência
+    } else {
+        // Para peixes seguros (verde)
+        ctx.shadowColor = 'rgba(0, 255, 0, 0.3)'; // Cor do halo verde com transparência
+    }
+    
+    ctx.shadowBlur = 20;  // Intensidade do desfoque da sombra
+    ctx.fillStyle = ctx.shadowColor; // Aplicar cor do halo no peixe
     ctx.beginPath();
     ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);  // Desenha o halo
     ctx.fill();
     ctx.restore();
 
+    // Desenha a imagem do peixe
     const img = fishImages[f.data.name];
     if (img && img.complete && img.naturalWidth > 0) {
       ctx.drawImage(img, f.x - 45, f.y - 45, 90, 90);  
