@@ -184,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
   fishImages['Tambaqui'].src = 'Tambaqui.png';
   fishImages['Tucunaré'].src = 'Tucunare.png';
 
-  player = { x: window.innerWidth / 2, y: window.innerHeight - 120, w: 120, h: 120, targetX: window.innerWidth / 2 };
+  player = { x: window.innerWidth / 2, y: window.innerHeight - 120, w: 160, h: 160, targetX: window.innerWidth / 2 };
 
   const img = new Image();
   img.src = "pirarucu m.png";
@@ -194,31 +194,37 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Alterando a taxa de aparição dos peixes e a dificuldade
-  let fishSpawnRate = 0.02 - level * 0.005; // A chance de gerar peixe vai diminuir conforme o nível
+  let fishSpawnRate = 0.02;  // A chance de gerar peixe vai continuar fixa
   let fishSpeed = 2 + level * 0.2; // Aumentando a velocidade dos peixes conforme o nível
+  let castanhaChance = 0.05; // Chance inicial da Castanha aparecer
 
   function createFish() {
-    // Mudando a chance de criação dos peixes de acordo com o nível
+    // A chance da Castanha aparecer diminui conforme o nível
     if (Math.random() < fishSpawnRate) {
-      const d = fishData[Math.floor(Math.random() * fishData.length)];
+      const isCastanha = Math.random() < castanhaChance;
+      const d = isCastanha ? fishData.find(f => f.name === 'Castanha') : fishData[Math.floor(Math.random() * fishData.length)];
+
       fish.push({ x: Math.random() * canvas.width, y: -50, dy: fishSpeed, data: d });
+
+      // Reduz a chance da Castanha aparecer conforme o nível
+      castanhaChance = Math.max(0.01, castanhaChance - 0.005 * level);  // Nunca menos que 1% de chance
     }
   }
 
   function drawFish(f) {
     ctx.fillStyle = f.data.color;
     ctx.beginPath();
-    ctx.arc(f.x, f.y, 25, 0, Math.PI * 2);
+    ctx.arc(f.x, f.y, 35, 0, Math.PI * 2);  // Aumentei o tamanho do peixe
     ctx.fill();
     const img = fishImages[f.data.name];
     if (img && img.complete && img.naturalWidth > 0) {
-      ctx.drawImage(img, f.x - 25, f.y - 25, 50, 50);
+      ctx.drawImage(img, f.x - 35, f.y - 35, 70, 70);  // Ajustei o tamanho do peixe ao tamanho maior
     }
   }
 
   function checkCollision(f) {
     const dx = f.x - player.x, dy = f.y - player.y, dist = Math.sqrt(dx * dx + dy * dy);
-    return dist < 60;
+    return dist < 90;  // Ajustei a colisão para o tamanho do peixe maior
   }
 
   function showMessage(msg, color) {
@@ -267,7 +273,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function levelUp() {
     level++;
     levelEl.textContent = level;
-    fishSpawnRate = 0.02 - level * 0.005;  // Diminui a chance de spawn conforme o nível
     fishSpeed = 2 + level * 0.2;  // Aumenta a velocidade de queda dos peixes
     showMessage(`Nível ${level}!`, "#0f0");
   }
