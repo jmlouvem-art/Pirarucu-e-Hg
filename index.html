@@ -127,6 +127,7 @@
     <p>Pontuação: <span id="final-score" class="font-bold text-blue-600">0</span></p>
     <p>Nível: <span id="final-level" class="font-bold">1</span></p>
     <button id="restart-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Jogar Novamente</button>
+    <button id="view-ranking-button" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Ver Ranking</button>
   </div>
 </div>
 
@@ -145,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
         playerNameInput = document.getElementById("player-name-input"),
         startButton = document.getElementById("start-button"),
         restartButton = document.getElementById("restart-button"),
+        viewRankingButton = document.getElementById("view-ranking-button"),
         playerNameDisplay = document.getElementById("player-name-display");
 
   let playerName = "", player, score = 0, level = 1, mercury = 0, fish = [], gameRunning = false;
@@ -193,13 +195,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (img.complete) ctx.drawImage(img, player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
   }
 
-  // Alterando a taxa de aparição dos peixes e a dificuldade
   let fishSpawnRate = 0.02;  // A chance de gerar peixe vai continuar fixa
   let fishSpeed = 2 + level * 0.2; // Aumentando a velocidade dos peixes conforme o nível
   let castanhaChance = 0.05; // Chance inicial da Castanha aparecer
 
   function createFish() {
-    // A chance da Castanha aparecer diminui conforme o nível
     if (Math.random() < fishSpawnRate) {
       const isCastanha = Math.random() < castanhaChance;
       const d = isCastanha ? fishData.find(f => f.name === 'Castanha') : fishData[Math.floor(Math.random() * fishData.length)];
@@ -214,17 +214,28 @@ document.addEventListener("DOMContentLoaded", () => {
   function drawFish(f) {
     ctx.fillStyle = f.data.color;
     ctx.beginPath();
-    ctx.arc(f.x, f.y, 35, 0, Math.PI * 2);  // Aumentei o tamanho do peixe
+    ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);  // Aumentei o tamanho do peixe
     ctx.fill();
+
+    // Adicionando o halo transparente
+    ctx.save();
+    ctx.shadowColor = 'rgba(255, 0, 0, 0.3)';
+    ctx.shadowBlur = 15;  // Maior blur para o halo
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.2)'; // Cor do halo
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);  // Aumentando o halo
+    ctx.fill();
+    ctx.restore();
+
     const img = fishImages[f.data.name];
     if (img && img.complete && img.naturalWidth > 0) {
-      ctx.drawImage(img, f.x - 35, f.y - 35, 70, 70);  // Ajustei o tamanho do peixe ao tamanho maior
+      ctx.drawImage(img, f.x - 45, f.y - 45, 90, 90);  // Ajustei o tamanho do peixe
     }
   }
 
   function checkCollision(f) {
     const dx = f.x - player.x, dy = f.y - player.y, dist = Math.sqrt(dx * dx + dy * dy);
-    return dist < 90;  // Ajustei a colisão para o tamanho do peixe maior
+    return dist < 90;
   }
 
   function showMessage(msg, color) {
@@ -251,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (mercury >= 100) endGame();
       }
     });
-    createFish(); // Criar novos peixes conforme a taxa ajustada
+    createFish();
     mercuryBarEl.style.height = mercury + "%";
     mercuryPercentEl.textContent = mercury;
     scoreEl.textContent = score;
@@ -284,6 +295,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("final-player-name").textContent = playerName;
     gameOverModal.classList.remove("hidden");
     gameOverModal.style.opacity = 1;
+    saveRanking();
   }
 
   // Função para salvar o ranking no localStorage
@@ -295,13 +307,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Função para mostrar o ranking
-  function showRanking() {
+  viewRankingButton.onclick = () => {
     const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
-    console.log('Ranking:', ranking);
-    ranking.forEach((entry, index) => {
-      console.log(`${index + 1}. ${entry.name} - ${entry.score} pontos (Nível ${entry.level})`);
-    });
-  }
+    alert(ranking.map((entry, index) => `${index + 1}. ${entry.name} - ${entry.score} pontos (Nível ${entry.level})`).join("\n"));
+  };
 
   canvas.addEventListener("mousemove", e => player.targetX = e.clientX);
   canvas.addEventListener("touchmove", e => {
@@ -326,7 +335,6 @@ document.addEventListener("DOMContentLoaded", () => {
   startButton.onclick = startGame;
   restartButton.onclick = () => {
     gameOverModal.classList.add("hidden");
-    saveRanking();  // Salvar no ranking quando o jogo termina
     startGame();
   };
 });
