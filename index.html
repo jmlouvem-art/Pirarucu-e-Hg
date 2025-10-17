@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -49,6 +49,22 @@
     .modal { transition: opacity .3s ease-in-out; }
     .particle { position: absolute; pointer-events: none; width: 5px; height: 5px; border-radius: 50%; animation: fade 1s forwards; }
     @keyframes fade { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(.5) translateY(-50px); } }
+
+    /* Rodapé */
+    .footer {
+      text-align: center;
+      padding: 20px;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #0c4a6e;
+      color: white;
+    }
+    .footer img {
+      width: 40px;
+      height: 40px;
+      margin: 0 10px;
+    }
   </style>
 </head>
 
@@ -64,11 +80,11 @@
       <input id="player-name-input" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20" placeholder="Seu nome" autofocus>
       <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
       <button id="view-ranking-name-modal" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Ver Ranking</button>
-   <!-- Desenvolvido por -->
+    </div>
+    <!-- Desenvolvido por -->
     <p class="mt-4 text-xs text-gray-500">
       Desenvolvido por <strong>Júlia Maretti Louvem</strong> e <strong>Yan Ribeiro de Paiva</strong>
     </p>
-    </div>
   </div>
 </div>
 
@@ -380,6 +396,12 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 });
 </script>
+
+<!-- Rodapé com logos -->
+<div class="footer">
+  <img src="UERJ_logo.png" alt="Logo UERJ">
+  <img src="Logo_LAPESF.png" alt="Logo LAPESF">
+</div>
 
 </body>
 </html>
