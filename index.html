@@ -132,123 +132,145 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const canvas=document.getElementById("gameCanvas"),ctx=canvas.getContext("2d");
-  const scoreEl=document.getElementById("score"),levelEl=document.getElementById("level"),
-        mercuryBarEl=document.getElementById("mercury-bar"),mercuryPercentEl=document.getElementById("mercury-percent"),
-        nameModal=document.getElementById("name-modal"),startModal=document.getElementById("start-modal"),
-        gameOverModal=document.getElementById("game-over-modal"),
-        nameSubmitButton=document.getElementById("name-submit-button"),
-        playerNameInput=document.getElementById("player-name-input"),
-        startButton=document.getElementById("start-button"),
-        restartButton=document.getElementById("restart-button"),
-        playerNameDisplay=document.getElementById("player-name-display");
+  const canvas = document.getElementById("gameCanvas"),
+        ctx = canvas.getContext("2d");
+  const scoreEl = document.getElementById("score"),
+        levelEl = document.getElementById("level"),
+        mercuryBarEl = document.getElementById("mercury-bar"),
+        mercuryPercentEl = document.getElementById("mercury-percent"),
+        nameModal = document.getElementById("name-modal"),
+        startModal = document.getElementById("start-modal"),
+        gameOverModal = document.getElementById("game-over-modal"),
+        nameSubmitButton = document.getElementById("name-submit-button"),
+        playerNameInput = document.getElementById("player-name-input"),
+        startButton = document.getElementById("start-button"),
+        restartButton = document.getElementById("restart-button"),
+        playerNameDisplay = document.getElementById("player-name-display");
 
-  let playerName="",player,score=0,level=1,mercury=0,fish=[],gameRunning=false;
+  let playerName = "", player, score = 0, level = 1, mercury = 0, fish = [], gameRunning = false;
 
-  function resizeCanvas(){
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
   }
-  window.addEventListener("resize",resizeCanvas);
+  window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
 
-  const fishData=[ 
-    {name:"Tambaqui",points:10,mercury:0,color:"#0f0"},
-    {name:"Pacu",points:10,mercury:0,color:"#0f0"},
-    {name:"Aruanã",points:15,mercury:0,color:"#0f0"},
-    {name:"Castanha",points:20,mercury:-10,color:"#ff0"},
-    {name:"Tucunaré",points:-5,mercury:25,color:"#f00"},
-    {name:"Surubim",points:-5,mercury:30,color:"#f00"},
-    {name:"Piranha",points:-5,mercury:20,color:"#f00"}
+  const fishData = [
+    { name: "Tambaqui", points: 10, mercury: 0, color: "#0f0" },
+    { name: "Pacu", points: 10, mercury: 0, color: "#0f0" },
+    { name: "Aruanã", points: 15, mercury: 0, color: "#0f0" },
+    { name: "Castanha", points: 20, mercury: -10, color: "#ff0" },
+    { name: "Tucunaré", points: -5, mercury: 25, color: "#f00" },
+    { name: "Surubim", points: -5, mercury: 30, color: "#f00" },
+    { name: "Piranha", points: -5, mercury: 20, color: "#f00" }
   ];
 
-  player={x:window.innerWidth/2,y:window.innerHeight-120,w:120,h:120,targetX:window.innerWidth/2};
-  const img=new Image();img.src="pirarucu m.png";
+  player = { x: window.innerWidth / 2, y: window.innerHeight - 120, w: 120, h: 120, targetX: window.innerWidth / 2 };
+  const img = new Image();
+  img.src = "pirarucu m.png";
 
-  function drawPlayer(){
-    if(img.complete) ctx.drawImage(img,player.x-player.w/2,player.y-player.h/2,player.w,player.h);
+  function drawPlayer() {
+    if (img.complete) ctx.drawImage(img, player.x - player.w / 2, player.y - player.h / 2, player.w, player.h);
   }
 
-  function createFish(){
-    const d=fishData[Math.floor(Math.random()*fishData.length)];
-    fish.push({x:Math.random()*canvas.width,y:-50,dy:2+d.mercury/25,data:d});
+  function createFish() {
+    const d = fishData[Math.floor(Math.random() * fishData.length)];
+    fish.push({ x: Math.random() * canvas.width, y: -50, dy: 2 + d.mercury / 25, data: d });
   }
 
-  function drawFish(f){
-    ctx.fillStyle=f.data.color;
-    ctx.beginPath();ctx.arc(f.x,f.y,25,0,Math.PI*2);ctx.fill();
+  function drawFish(f) {
+    ctx.fillStyle = f.data.color;
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, 25, 0, Math.PI * 2);
+    ctx.fill();
   }
 
-  function checkCollision(f){
-    const dx=f.x-player.x,dy=f.y-player.y,dist=Math.sqrt(dx*dx+dy*dy);
-    return dist<60;
+  function checkCollision(f) {
+    const dx = f.x - player.x, dy = f.y - player.y, dist = Math.sqrt(dx * dx + dy * dy);
+    return dist < 60;
   }
 
-  function showMessage(msg,color){
-    const el=document.getElementById("game-message");
-    el.textContent=msg;el.style.color=color;el.style.opacity=1;
-    setTimeout(()=>el.style.opacity=0,1000);
+  function showMessage(msg, color) {
+    const el = document.getElementById("game-message");
+    el.textContent = msg;
+    el.style.color = color;
+    el.style.opacity = 1;
+    setTimeout(() => el.style.opacity = 0, 1000);
   }
 
-  function loop(){
-    if(!gameRunning)return;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    player.x+=(player.targetX-player.x)*0.1;
+  function loop() {
+    if (!gameRunning) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    player.x += (player.targetX - player.x) * 0.1;
     drawPlayer();
-    fish.forEach(f=>{
-      f.y+=f.dy;
+    fish.forEach(f => {
+      f.y += f.dy;
       drawFish(f);
-      if(checkCollision(f)){
-        score+=f.data.points;
-        mercury=Math.max(0,Math.min(100,mercury+f.data.mercury));
-        showMessage(`${f.data.points>0?'+':''}${f.data.points} pts`,f.data.mercury>0?"#f00":"#0f0");
-        fish.splice(fish.indexOf(f),1);
-        if(mercury>=100)endGame();
+      if (checkCollision(f)) {
+        score += f.data.points;
+        mercury = Math.max(0, Math.min(100, mercury + f.data.mercury));
+        showMessage(`${f.data.points > 0 ? '+' : ''}${f.data.points} pts`, f.data.mercury > 0 ? "#f00" : "#0f0");
+        fish.splice(fish.indexOf(f), 1);
+        if (mercury >= 100) endGame();
       }
     });
-    if(Math.random()<0.02)createFish();
-    mercuryBarEl.style.height=mercury+"%";
-    mercuryPercentEl.textContent=mercury;
-    scoreEl.textContent=score;
+    if (Math.random() < 0.02) createFish();
+    mercuryBarEl.style.height = mercury + "%";
+    mercuryPercentEl.textContent = mercury;
+    scoreEl.textContent = score;
+    if (score >= level * 100) levelUp();
     requestAnimationFrame(loop);
   }
 
-  function startGame(){
-    score=0;level=1;mercury=0;fish=[];gameRunning=true;
+  function startGame() {
+    score = 0;
+    level = 1;
+    mercury = 0;
+    fish = [];
+    gameRunning = true;
     startModal.classList.add("hidden");
     resizeCanvas();
     loop();
   }
 
-  function endGame(){
-    gameRunning=false;
-    document.getElementById("final-score").textContent=score;
-    document.getElementById("final-level").textContent=level;
-    document.getElementById("final-player-name").textContent=playerName;
-    gameOverModal.classList.remove("hidden");
-    gameOverModal.style.opacity=1;
+  function levelUp() {
+    level++;
+    levelEl.textContent = level;
+    showMessage(`Nível ${level}!`, "#0f0");
   }
 
-  canvas.addEventListener("mousemove",e=>player.targetX=e.clientX);
-  canvas.addEventListener("touchmove",e=>{
-    const t=e.touches[0];if(t)player.targetX=t.clientX;
+  function endGame() {
+    gameRunning = false;
+    document.getElementById("final-score").textContent = score;
+    document.getElementById("final-level").textContent = level;
+    document.getElementById("final-player-name").textContent = playerName;
+    gameOverModal.classList.remove("hidden");
+    gameOverModal.style.opacity = 1;
+  }
+
+  canvas.addEventListener("mousemove", e => player.targetX = e.clientX);
+  canvas.addEventListener("touchmove", e => {
+    const t = e.touches[0];
+    if (t) player.targetX = t.clientX;
   });
 
-  nameSubmitButton.onclick=()=>{ 
-    const n=playerNameInput.value.trim(); 
-    if(!n){alert("Digite seu nome!");return;} 
-    playerName=n;playerNameDisplay.textContent=n; 
-    nameModal.classList.add("hidden"); 
-    startModal.classList.remove("hidden"); 
-    startModal.style.opacity=1;
+  nameSubmitButton.onclick = () => {
+    const n = playerNameInput.value.trim();
+    if (!n) { alert("Digite seu nome!"); return; }
+    playerName = n;
+    playerNameDisplay.textContent = n;
+    nameModal.classList.add("hidden");
+    startModal.classList.remove("hidden");
+    startModal.style.opacity = 1;
   };
 
-  playerNameInput.addEventListener("keydown",e=>{
-    if(e.key==="Enter")nameSubmitButton.click();
+  playerNameInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") nameSubmitButton.click();
   });
 
-  startButton.onclick=startGame;
-  restartButton.onclick=()=>{
+  startButton.onclick = startGame;
+  restartButton.onclick = () => {
     gameOverModal.classList.add("hidden");
     startGame();
   };
