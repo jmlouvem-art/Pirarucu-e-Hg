@@ -132,17 +132,6 @@
   </div>
 </div>
 
-<!-- Ranking Modal -->
-<div id="ranking-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
-  <div class="bg-white rounded-lg p-6 text-center shadow-xl w-full max-w-md mx-auto">
-    <h2 class="text-2xl font-bold mb-4">🏆 Ranking</h2>
-    <div id="ranking-list" class="text-left mb-4">
-      <!-- Ranking items will be inserted here by JavaScript -->
-    </div>
-    <button id="close-ranking-modal" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Fechar</button>
-  </div>
-</div>
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("gameCanvas"),
@@ -159,11 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
         startButton = document.getElementById("start-button"),
         restartButton = document.getElementById("restart-button"),
         viewRankingButton = document.getElementById("view-ranking-button"),
-        playerNameDisplay = document.getElementById("player-name-display"),
-        rankingModal = document.getElementById("ranking-modal"),
-        rankingList = document.getElementById("ranking-list"),
-        closeRankingModal = document.getElementById("close-ranking-modal"),
-        viewRankingNameModal = document.getElementById("view-ranking-name-modal");
+        playerNameDisplay = document.getElementById("player-name-display");
 
   let playerName = "", player, score = 0, level = 1, mercury = 0, fish = [], gameRunning = false;
 
@@ -232,26 +217,14 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);
     ctx.fill();
 
-    // Adiciona um halo para peixes tóxicos
-    if (f.data.mercury > 0) {
-      ctx.save();
-      ctx.shadowColor = 'rgba(255, 0, 0, 0.8)'; // Vermelho mais vibrante para toxicidade
-      ctx.shadowBlur = 15; // Suavidade do halo
-      ctx.fillStyle = 'rgba(255, 0, 0, 0.6)'; // Cor do preenchimento do halo
-      ctx.beginPath();
-      ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    } else if (f.data.mercury < 0) {
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 255, 0, 0.8)'; // Verde para peixes bons
-      ctx.shadowBlur = 15;
-      ctx.fillStyle = 'rgba(0, 255, 0, 0.6)';
-      ctx.beginPath();
-      ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-    }
+    ctx.save();
+    ctx.shadowColor = 'rgba(255, 0, 0, 0.3)'; 
+    ctx.shadowBlur = 20;  // Ajuste de suavidade no halo
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
+    ctx.beginPath();
+    ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);  
+    ctx.fill();
+    ctx.restore();
 
     const img = fishImages[f.data.name];
     if (img && img.complete && img.naturalWidth > 0) {
@@ -328,45 +301,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
     ranking.push({ name: playerName, score, level });
     ranking.sort((a, b) => b.score - a.score);
-    localStorage.setItem(\'ranking\', JSON.stringify(ranking.slice(0, 10)));
-  }
-
-  function displayRanking() {
-    const ranking = JSON.parse(localStorage.getItem(\'ranking\') || \'[]\');
-    rankingList.innerHTML = \'\'; // Limpa a lista anterior
-    if (ranking.length === 0) {
-      rankingList.innerHTML = \'<p class="text-gray-600">Nenhum registro no ranking ainda.</p>\';
-      return;
-    }
-    const ul = document.createElement(\'ul\');
-    ul.className = \'list-decimal list-inside\';
-    ranking.forEach((entry, index) => {
-      const li = document.createElement(\'li\');
-      li.className = \'mb-1 text-lg\';
-      li.textContent = `${index + 1}. ${entry.name} - ${entry.score} pontos (Nível ${entry.level})`;
-      ul.appendChild(li);
-    });
-    rankingList.appendChild(ul);
-    rankingModal.classList.remove(\'hidden\');
-    rankingModal.style.opacity = 1;
+    localStorage.setItem('ranking', JSON.stringify(ranking.slice(0, 10)));
   }
 
   viewRankingButton.onclick = () => {
-    gameOverModal.classList.add(\'hidden\');
-    gameOverModal.style.opacity = 0;
-    displayRanking();
+    const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
+    alert(ranking.map((entry, index) => `${index + 1}. ${entry.name} - ${entry.score} pontos (Nível ${entry.level})`).join("\n"));
   };
 
-  viewRankingNameModal.onclick = () => {
-    nameModal.classList.add(\'hidden\');
-    nameModal.style.opacity = 0;
-    displayRanking();
-  };
-
-  closeRankingModal.onclick = () => {
-    rankingModal.classList.add(\'hidden\');
-    rankingModal.style.opacity = 0;
-  }; canvas.addEventListener("mousemove", e => player.targetX = e.clientX);
+  canvas.addEventListener("mousemove", e => player.targetX = e.clientX);
   canvas.addEventListener("touchmove", e => {
     const t = e.touches[0];
     if (t) player.targetX = t.clientX;
