@@ -197,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   let fishSpawnRate = 0.02;
-  let fishSpeed = 2 + level * 0.2;
+  let fishSpeed = 2 + level * 0.5;
   let castanhaChance = 0.05;
 
   function createFish() {
@@ -283,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function levelUp() {
     level++;
     levelEl.textContent = level;
-    fishSpeed = 2 + level * 0.2;
+    fishSpeed = 2 + level * 0.5;
     showMessage(`Nível ${level}!`, "#0f0");
   }
 
