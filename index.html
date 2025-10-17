@@ -160,13 +160,13 @@ document.addEventListener("DOMContentLoaded", () => {
   resizeCanvas();
 
   const fishData = [
-    { name: "Tambaqui", points: 10, mercury: 0, color: "#0f0" },
-    { name: "Pacu", points: 10, mercury: 0, color: "#0f0" },
-    { name: "Aruanã", points: 15, mercury: 0, color: "#0f0" },
-    { name: "Castanha", points: 20, mercury: -10, color: "#ff0" },
-    { name: "Tucunaré", points: -5, mercury: 25, color: "#f00" },
-    { name: "Surubim", points: -5, mercury: 30, color: "#f00" },
-    { name: "Piranha", points: -5, mercury: 20, color: "#f00" }
+    { name: "Tambaqui", points: 10, mercury: 0, color: "rgba(0, 255, 0, 0.5)" },
+    { name: "Pacu", points: 10, mercury: 0, color: "rgba(0, 255, 0, 0.5)" },
+    { name: "Aruanã", points: 15, mercury: 0, color: "rgba(0, 255, 0, 0.5)" },
+    { name: "Castanha", points: 20, mercury: -10, color: "rgba(255, 255, 0, 0.5)" },
+    { name: "Tucunaré", points: -5, mercury: 25, color: "rgba(255, 0, 0, 0.5)" },
+    { name: "Surubim", points: -5, mercury: 30, color: "rgba(255, 0, 0, 0.5)" },
+    { name: "Piranha", points: -5, mercury: 20, color: "rgba(255, 0, 0, 0.5)" }
   ];
 
   const fishImages = {
@@ -222,7 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.shadowBlur = 20;  // Ajuste de suavidade no halo
     ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; 
     ctx.beginPath();
-    ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);  
+    ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);  // Desenha o halo
     ctx.fill();
     ctx.restore();
 
