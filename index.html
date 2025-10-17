@@ -132,6 +132,15 @@
   </div>
 </div>
 
+<!-- Modal Ranking -->
+<div id="ranking-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
+  <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+    <h2 class="text-2xl font-bold mb-4 text-center">🏆 Ranking de Jogadores</h2>
+    <div id="ranking-list" class="space-y-2"></div>
+    <button id="close-ranking-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mt-4">Fechar</button>
+  </div>
+</div>
+
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("gameCanvas"),
@@ -143,11 +152,13 @@ document.addEventListener("DOMContentLoaded", () => {
         nameModal = document.getElementById("name-modal"),
         startModal = document.getElementById("start-modal"),
         gameOverModal = document.getElementById("game-over-modal"),
+        rankingModal = document.getElementById("ranking-modal"),
         nameSubmitButton = document.getElementById("name-submit-button"),
         playerNameInput = document.getElementById("player-name-input"),
         startButton = document.getElementById("start-button"),
         restartButton = document.getElementById("restart-button"),
         viewRankingButton = document.getElementById("view-ranking-button"),
+        closeRankingButton = document.getElementById("close-ranking-button"),
         playerNameDisplay = document.getElementById("player-name-display");
 
   let playerName = "", player, score = 0, level = 1, mercury = 0, fish = [], gameRunning = false;
@@ -217,7 +228,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);
     ctx.fill();
    
-    
     ctx.shadowBlur = 20;  // Intensidade do desfoque da sombra
     ctx.fillStyle = ctx.shadowColor; // Aplicar cor do halo no peixe
     ctx.beginPath();
@@ -333,6 +343,10 @@ document.addEventListener("DOMContentLoaded", () => {
   restartButton.onclick = () => {
     gameOverModal.classList.add("hidden");
     startGame();
+  };
+
+  closeRankingButton.onclick = () => {
+    rankingModal.classList.add("hidden");
   };
 });
 </script>
