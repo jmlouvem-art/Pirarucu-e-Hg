@@ -64,10 +64,10 @@
       <input id="player-name-input" class="border-2 border-blue-500 rounded-lg px-4 py-2 w-full mb-4 text-center" maxlength="20" placeholder="Seu nome" autofocus>
       <button id="name-submit-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Continuar</button>
       <button id="view-ranking-name-modal" class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg w-full mb-2">Ver Ranking</button>
-   <!-- Desenvolvido por -->
-    <p class="mt-4 text-xs text-gray-500">
-      Desenvolvido por <strong>Júlia Maretti Louvem</strong> e <strong>Yan Ribeiro de Paiva</strong>
-    </p>
+      <!-- Desenvolvido por -->
+      <p class="mt-4 text-xs text-gray-500">
+        Desenvolvido por <strong>Júlia Maretti Louvem</strong> e <strong>Yan Ribeiro de Paiva</strong>
+      </p>
     </div>
   </div>
 </div>
@@ -117,9 +117,9 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left mb-4">
       <p class="font-bold text-green-600">🟢 Peixes Seguros:<br>Tambaqui, Pacu, Aruanã</p>
       <p class="font-bold text-red-600">🔴 Contaminados:<br>Tucunaré, Surubim, Piranha</p>
-      <p class="font-bold text-yellow-500"> 🟡 Cura:<br>Castanha</p>
+      <p class="font-bold text-yellow-500">🟡 Cura:<br>Castanha</p>
     </div>
-    <p class="mb-3 text-sm">Colete peixes seguros e evite os contaminados. Caso seu nível esteja alto use a castanhã do Pára para diminuir a sua contaminação!</p>
+    <p class="mb-3 text-sm">Colete peixes seguros e evite os contaminados. Caso sua contaminação esteja alta use a castanha-do-pará para diminuir!</p>
     <p class="mb-6 text-sm">Arraste o dedo ou o mouse para mover o Pirarucu.</p>
     <button id="start-button" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg w-full">Começar</button>
     <!-- Desenvolvido por -->
@@ -146,7 +146,7 @@
 </div>
 
 <!-- Modal Ranking -->
-<div id="ranking-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[120] hidden opacity-0">
+<div id="ranking-modal" class="modal fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-[130] hidden opacity-0">
   <div class="bg-white rounded-lg p-6 text-center shadow-xl max-w-md w-full max-h-[80vh] overflow-y-auto">
     <h2 class="text-2xl font-bold mb-4 text-center">🏆 Ranking de Jogadores</h2>
     <div id="ranking-list" class="space-y-2"></div>
@@ -166,11 +166,13 @@ document.addEventListener("DOMContentLoaded", () => {
         startModal = document.getElementById("start-modal"),
         gameOverModal = document.getElementById("game-over-modal"),
         rankingModal = document.getElementById("ranking-modal"),
+        rankingList  = document.getElementById("ranking-list"),
         nameSubmitButton = document.getElementById("name-submit-button"),
         playerNameInput = document.getElementById("player-name-input"),
         startButton = document.getElementById("start-button"),
         restartButton = document.getElementById("restart-button"),
         viewRankingButton = document.getElementById("view-ranking-button"),
+        viewRankingNameBtn = document.getElementById("view-ranking-name-modal"),
         closeRankingButton = document.getElementById("close-ranking-button"),
         playerNameDisplay = document.getElementById("player-name-display");
 
@@ -228,9 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (Math.random() < fishSpawnRate) {
       const isCastanha = Math.random() < castanhaChance;
       const d = isCastanha ? fishData.find(f => f.name === 'Castanha') : fishData[Math.floor(Math.random() * fishData.length)];
-
       fish.push({ x: Math.random() * canvas.width, y: -50, dy: fishSpeed, data: d });
-
       castanhaChance = Math.max(0.01, castanhaChance - 0.005 * level); 
     }
   }
@@ -240,18 +240,23 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.beginPath();
     ctx.arc(f.x, f.y, 45, 0, Math.PI * 2);
     ctx.fill();
-   
-    ctx.shadowBlur = 20;  // Intensidade do desfoque da sombra
-    ctx.fillStyle = ctx.shadowColor; // Aplicar cor do halo no peixe
+
+    // Halo suave opcional (transparente)
+    ctx.save();
+    ctx.globalAlpha = 0.25;
+    const grad = ctx.createRadialGradient(f.x, f.y, 30, f.x, f.y, 70);
+    grad.addColorStop(0, 'rgba(255,255,255,0.35)');
+    grad.addColorStop(1, 'rgba(255,255,255,0.0)');
+    ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(f.x, f.y, 50, 0, Math.PI * 2);  // Desenha o halo
+    ctx.arc(f.x, f.y, 70, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // Desenha a imagem do peixe
-    const img = fishImages[f.data.name];
-    if (img && img.complete && img.naturalWidth > 0) {
-      ctx.drawImage(img, f.x - 45, f.y - 45, 90, 90);  
+    // Imagem do peixe (por cima)
+    const imgF = fishImages[f.data.name];
+    if (imgF && imgF.complete && imgF.naturalWidth > 0) {
+      ctx.drawImage(imgF, f.x - 45, f.y - 45, 90, 90);
     }
   }
 
@@ -273,21 +278,26 @@ document.addEventListener("DOMContentLoaded", () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     player.x += (player.targetX - player.x) * 0.1;
     drawPlayer();
-    fish.forEach(f => {
+
+    fish.forEach((f, i) => {
       f.y += f.dy;
       drawFish(f);
       if (checkCollision(f)) {
         score += f.data.points;
         mercury = Math.max(0, Math.min(100, mercury + f.data.mercury));
         showMessage(`${f.data.points > 0 ? '+' : ''}${f.data.points} pts`, f.data.mercury > 0 ? "#f00" : "#0f0");
-        fish.splice(fish.indexOf(f), 1);
+        fish.splice(i, 1);
         if (mercury >= 100) endGame();
+      } else if (f.y > canvas.height + 60) {
+        fish.splice(i, 1);
       }
     });
+
     createFish();  
     mercuryBarEl.style.height = mercury + "%";
     mercuryPercentEl.textContent = mercury;
     scoreEl.textContent = score;
+
     if (score >= level * 100) levelUp();
     requestAnimationFrame(loop);
   }
@@ -327,33 +337,53 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem('ranking', JSON.stringify(ranking.slice(0, 10)));
   }
 
-  viewRankingButton.onclick = () => {
-    const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
-    rankingModal.classList.remove("hidden");
-    setTimeout(() => rankingModal.style.opacity = "1", 10);
+  // --------- RANKING: funções e eventos (botão do nome + botão do game over) ----------
+  function getRanking(){
+    try { return JSON.parse(localStorage.getItem('ranking') || '[]'); }
+    catch(e){ return []; }
+  }
 
-    const rankingList = document.getElementById("ranking-list");
+  function renderRanking(){
+    const data = getRanking();
     rankingList.innerHTML = '';
-    ranking.forEach((entry, index) => {
-      const entryElement = document.createElement("div");
-      entryElement.classList.add("mb-2", "p-3", "rounded-lg", "bg-gray-200");
-      entryElement.innerHTML = `
-        <div class="font-bold">${index + 1}. ${entry.name}</div>
-        <div>Pontos: ${entry.score} | Nível: ${entry.level}</div>
+    if (!data.length){
+      rankingList.innerHTML = '<p class="text-gray-500">Nenhum registro ainda. Jogue para entrar no ranking!</p>';
+      return;
+    }
+    data.forEach((entry, idx) => {
+      const div = document.createElement('div');
+      div.className = 'p-3 rounded-lg border border-gray-200 flex justify-between items-center';
+      const medal = idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':`${idx+1}º`;
+      div.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="text-xl font-bold">${medal}</span>
+          <div>
+            <div class="font-bold">${entry.name || '—'}</div>
+            <div class="text-xs text-gray-500">Nível ${entry.level ?? 1}</div>
+          </div>
+        </div>
+        <div class="font-bold text-blue-600">${entry.score ?? 0} pts</div>
       `;
-      rankingList.appendChild(entryElement);
+      rankingList.appendChild(div);
     });
-  };
+  }
 
-  closeRankingButton.onclick = () => {
-    rankingModal.style.opacity = "0";
-    setTimeout(() => {
-      rankingModal.classList.add("hidden");
-      nameModal.classList.remove("hidden");
-      nameModal.style.opacity = "1";
-    }, 300);
-  };
+  function openRanking(){
+    renderRanking();
+    rankingModal.classList.remove('hidden');
+    requestAnimationFrame(()=> rankingModal.style.opacity = '1');
+  }
 
+  function closeRanking(){
+    rankingModal.style.opacity = '0';
+    setTimeout(()=> rankingModal.classList.add('hidden'), 300);
+  }
+
+  if (viewRankingNameBtn) viewRankingNameBtn.addEventListener('click', openRanking);
+  if (viewRankingButton)   viewRankingButton.addEventListener('click', openRanking);
+  if (closeRankingButton)  closeRankingButton.addEventListener('click', closeRanking);
+
+  // --------- Controles ---------
   canvas.addEventListener("mousemove", e => player.targetX = e.clientX);
   canvas.addEventListener("touchmove", e => {
     const t = e.touches[0];
